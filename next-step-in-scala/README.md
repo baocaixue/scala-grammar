@@ -22,7 +22,7 @@ greetStrings(2) = "world!\n"
 greetStrings.foreach(print)
 ```    
 　　**注意：** 上面代码示例只做概念的展示，这并不是Scala创建并初始化数组的推荐方法    
-　　
+
 　　Scala的数组访问方式是将下标放在圆括号里，而不是像Java那样放到中括号里。同时，这里也展示了Scala关于val的一个重要概念。当用val定义一个变量
 时，变量本身不能被重新赋值，但它指向的那个对象是有可能发生改变的。本例中，不能将greetStrings重新赋值成另一个数组，不过可以改变那个Array[String]
 的元素，因此数组本身是可变的（mutable）。    
