@@ -12,6 +12,7 @@
     <modules>
         <module>a-scalable-language</module>
         <module>first-step-in-scala</module>
+        <module>next-step-in-scala</module>
     </modules>
 
     <properties>
