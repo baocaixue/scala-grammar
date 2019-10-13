@@ -67,4 +67,21 @@ while (i < 10) {
 ```    
 
 ## Iterate-With-Foreach-And-For    
+　　就如前面所述，while循环实际上是在以*指令式（imperative）*的风格编程。指令式风格也是类似Java、C++、C这样语言的通常风格，一次给出执行指令，
+通过循环来遍历，而且还经常变更被不同函数共享的状态。Scala允许以指令式的风格编程，不过更倾向于使用*函数式（functional）* 的风格。    
+　　函数式编程语言的主要特征之一就是函数是一等的语法单元，Scala非常符合这个描述。举例来说，打印每个命令行参数的另一种方式是：    
+　　`args.foreach(arg => println(arg))`    
+　　这段代码中，对args执行foreach方法，传入一个函数。在本例中，传入的是一个*函数字面量（function literal）*，这个（匿名）函数接收一个名为
+arg的参数。函数体为println(arg)。    
+　　在前面示例中，Scala解释器推断出arg的类型是String，因为String是调用了foreach那个数组的元素类型。如果倾向于更明确地表达，也可以指出类型
+名：    
+　　`args.foreach((arg: String) => println(arg))`    
+　　还有一种更为精简的表达，可以利用Scala对函数字面量的一个特殊简写规则。如果函数字面量只是一个接收单个参数的语句，可以不必给出参数名和参数
+本身：    
+　　`args.foreach(println)`    
 
+　　Scala支持的指令式for语句（arg为val）：    
+```scala
+for (arg <- args)
+    println(arg)
+```
