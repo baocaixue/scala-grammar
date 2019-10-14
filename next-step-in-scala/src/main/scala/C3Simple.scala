@@ -40,6 +40,7 @@ object C3Simple {
     println("oneTwo init >> " + oneTwo.init)
     println("threeFour mkString >> " + threeFour.mkString("<"))
     println("oneTwoThreeFour sortWith desc >> " + oneTwoThreeFour.sortWith((a,b) => a > b))
+    println()
   }
 
 }
