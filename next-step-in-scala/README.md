@@ -31,7 +31,7 @@ greetStrings.foreach(print)
 for (i <- 0 to 2) println(arr(i))
 ```    
 
-　　上面代码，这个for表达式展示了Scala的另一个通行的规则：如果一个方法只接收一个参数，在调用它的时候，可以不使用英文句点。本例中的to实际上是
+　　上面代码，这个for表达式展示了Scala的另一个通行的规则：*如果一个方法只接收一个参数*，在调用它的时候，可以不使用英文句点。本例中的to实际上是
 一个Int参数的方法。代码0 to 2会被转换为(0).to(2)。注意这种方式仅在给出方法调用的目标对象时才有效。即调用方式是这样：“目标对象 方法 参数”。    
 
 　　Scala从技术上讲并没有操作符重载（operator overloading），因为它实际上并没有传统意义上的操作符。类似+、-、*、/这样的字符可以被用作方法名。
@@ -61,5 +61,73 @@ val numNames = Array("zero", "one", "two")
 
 ***
 
-　　
+## Use-Lists    
+　　函数式编程的重要理念之一就是方法不能有副作用。一个方法唯一要做的是计算并返回一个值。这样做的好处是方法不再互相纠缠在一起，因此变得更可靠、
+更易复用。另一个好处（作为静态类型的编程语言）是类型检查器会检查方法的入参和出参，因此逻辑错误通常都是以类型错误的形式出现。将这个函数式的哲学
+应用到对象的世界意味着让对象不可变。    
+　　Scala数组是 一个拥有相同类型的对象的可变序列。如一个Array[String]只能包含字符串，虽然无法在数组实例化后改变其长度，却可以改变它的元素
+值。因此数组是可变的对象。    
+
+　　对于需要拥有相同类型的对象的不可变序列的场景，可以使用Scala的List类。Scala的List（scala.List）跟Java的java.util.List的不同在于Scala
+的List是不可变的，而Java的List是可变的。更笼统地说，Scala的List被设计为允许函数式风格的编程。创建列表的方法如下：    
+　　`val oneTwoThree = List(1,2,3)`
+　　代码中建立一个新的名为oneTwoThree的val，并将其初始化成一个拥有整型元素1、2、3的List[Int]。由于List是不可变的，它们的行为有点类似于Java
+的字符串：调用列表的某个方法，而这个方法的名字看上去像是会改变列表的时候，它实际上是创建并返回一个带有新值的新列表。如，List有个方法叫“:::”，
+用于拼接列表。    
+　　也许列表上用的最多的操作是“::”，读作“cons”。它在一个已有列表的最前面添加一个新的元素，并返回这个新的列表，如：    
+```scala
+val twoThree = List(2,3)
+val oneTwoThree = 1 :: twoThree
+println(oneTwoThree)
+```    
+　　**注意：**    
+```text
+　　在表达式“1 :: twoThree”中，::是右操作元（right operand，即twoThree这个列表）的方法。::方法的结合性（associativity）背后的规则是
+这样的：如果一个方法被用在操作符表示法（operator notation）当中，比如 a * b，方法调用默认都发生在左操作元（left operand），除非方法名
+以冒号（:）结尾。如果方法名的最后一个字符是冒号，该方法的调用会发生在它的右操作元。因此，在 1 :: twoThree中，:: 方法调用发生在twoThree上，
+传入参数是1，即 twoThree.::(1)。
+```    
+
+　　表示空列表的快捷方式是Nil，初始化一个新的列表的另一种方式是用 :: 将元素串接起来，并将Nil作为最后一个元素（因为::方法定义在List上，若写
+成1:2:3编译不通过）。如：    
+
+　　`val oneTwoThree = 1 :: 2 :: 3 :: Nil`    
+
+　　*为什么不在列表的末尾追加元素？*    
+```text
+　　List类的确提供了“追加”（append）操作，写作:+，但是这个操作很少被使用，因为往列表（末尾）追加元素的操作所需要的时间随着列表的大小线性
+增加，而使用::在列表的前面添加元素只需要常量时间。如果想通过追加元素的方式高效地构建列表，可以依次在头部添加完成后，调用reverse。也可以用
+ListBuffer，这是个可变的列表，支持追加操作，完成后调用toList即可。
+```    
+
+　　List的一些方法和用途:        
+
+| 方法 | 用途  
+| --- | ---      
+| List()或Nil | 表示空列表    
+| List("Cool", "tools") | 创建一个新的List[String]，并初始化值    
+| val thrill = "Will" :: "fill" :: "until" :: Nil | 创建一个新的List[String]，包含3个值    
+| List("a","b") ::: List("c","d") | 将两个列表拼接起来，返回一个新列表    
+| thrill(2) | 返回列表thrill中下标为2的元素    
+| thrill.count(s => s.length == 4) | 对thrill中长度为4的字符串进行计数    
+| thrill.drop(2) | 返回去掉thrill的头两个元素的列表    
+| thrill.dropRight(2) | 返回去掉thrill后两个元素的列表    
+| thrill.exists(s => s == "until") | 判断thrill中是否有字符串元素值为“until”    
+| thrill.filter(s => s.length == 4) | 按顺序返回列表中所有长度为4的元素列表    
+| thrill.forall(s => s.endsWith("l")) | 表示列表中是否所有元素都以“l”结尾    
+| thrill.foreach(s => println(s)) | foreach    
+| thrill.head | thrill(0)，列表首个元素    
+| thrill.init | 返回列表除最后一个元素之外所有元素组成的列表    
+| thrill.isEmpty | 判断是否为空列表    
+| thrill.last | 返回列表最后一个元素    
+| thrill.length | 返回列表元素个数    
+| thrill.map(s => s + "y") | 返回一个对列表thrill所有字符串元素末尾添加“y”的新字符串列表    
+| thrill.mkString(", ") | 用列表thrill的所有元素组成字符串    
+| thrill.filterNot(s => s.length == 4) | 按顺序返回列表中所有长度不为4的元素列表    
+| thrill.reverse | 顺序反转    
+| thrill.sortWith((s,t) => s.charAt(0).toLower < t.charAt(0).toLower) | 返回包含列表thrill的所有元素，按照首字母小写的字母顺序排序的列表    
+| thrill.tail | 返回列表除首个元素外的所有元素    
+
+***   
+
 
