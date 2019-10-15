@@ -2,7 +2,7 @@
 - 第7步 用类型参数化数组...................................................[1](#Parameterize-Arrays-With-Type)
 - 第8步 使用列表...................................................[2](#Use-Lists)
 - 第9步 使用元祖...................................................[3](#Use-Tuples)
-- 第10步 使用集和映射...................................................[4](#Use-Set-Amd-Maps)
+- 第10步 使用集和映射...................................................[4](#Use-Set-And-Maps)
 - 第11步 识别函数式编程风格...................................................[5](#Recognize-Functional-Style)
 - 第12步 从文件读取文本行...................................................[6](#Read-Lines-From-File)    
 
@@ -129,5 +129,80 @@ ListBuffer，这是个可变的列表，支持追加操作，完成后调用toLi
 | thrill.tail | 返回列表除首个元素外的所有元素    
 
 ***   
+
+## Use-Tuples    
+　　另一个有用的容器对象是元组（tuple）。跟list类似，元组也是不可变的。不过跟list不同的是，**元组可以容纳不同类型的元素**。列表可以是List[Int]
+或List[String]，而元组可以同时包含整数和字符串。当需要从方法返回多个对象时，元组非常有用。在Java中遇到类似的情况通常会创建一个类似JavaBean
+那样的类来承载多个返回值，而用Scala可以简单地返回一个元组。要实例化一个元组，只需将对象放在括号中，用逗号隔开即可。一旦实例化好一个元组，可以用
+英文句点、下划线和*从1开始*的序号来访问每个元素。如下：    
+```scala
+val pair = (99, "Scala")
+println(pair._1)
+println(pair._2)
+```    
+
+　　**访问元组中的元素**    
+　　元组不能像列表那样访问元素（也就是“pair(0)”），是因为列表的apply方法永远只能返回同一种类型，但元组里的元素可以是不同类型的：_1可能是一
+种类型，_2可能是另一种类型，等等。这些_N表示的字段名是从1开始而不是从0开始，这是由其他同样支持静态类型元组的语言设定的传统，如Haskelll和ML。    
+
+***    
+## Use-Set-And-Maps    
+　　Scala给开发者同时享有函数式和指令式编程风格，其集合类库特意对可变和不可变的集合进行了区分。举例来说，数组永远是可变的，列表永远是不可变的。
+Scala同时还提供了集（set）和映射（map）的可变和不可变的不同选择，但使用同样的简单名字。对于集和映射而言，Scala通过不同的类继承关系来区分可变
+和不可变版本。    
+　　例如，Scala的API包含了一个基础的特质（trait）来表示集，这里的特质跟Java的接口定义类似。在此基础上，Scala提供了两个子特质（subtrait），
+一个用于表示可变集，另一个用于表示不可变集。    
+　　这三个特质都叫做Set（位于不同的包中）。Scala API中具体用于表示集的类，如HashSet，分别扩展自可变或不可变的Set。（在Java中“实现”某个接口，
+而在Scala中“扩展”或“混入”特质）。创建集的默认方式如下：    
+```scala
+var jetSet = Set("Boeing", "AAirbus")
+jetSet += "Lear"
+println(jetSet.contains("Cessna"))
+```    
+　　这段代码默认创建的Set是不可变的，Scala编译器推断出jetSet的类型为不可变的Set[String]。要向集里添加新的元素，可以对集调用+方法，出入这个
+新元素。不论是可变的还是不可变的集，+方法都会创建并返回一个新的包含了新元素的集。而可变变集提供了一个实际的+=方法，不可变集并不直接提供这个方法
+（实为jetSet = jetSet + "Lear"）。因此，这里实际上是将jetSet这个var重新赋值成一个新集。    
+
+　　如果想要一个可变集，需要做一次引入（import），如下：    
+```scala
+import scala.collection.mutable.Set
+
+val movieSet = Set("Hitch", "Poltergeiset")
+movieSet += "Shrek"
+println(movieSet)
+```    
+
+　　尽管由可变和不可变Set的工程方法生产出来的默认集的实现对于大多数情况来说都够用了，偶尔可能也需要一类特定的集。需要做的是简单地引入需要的类，
+然后使用其伴生对象上的工厂方法。例如，需要一个不可变的HashSet：     
+```scala
+import scala.collection.immutable.HashSet
+
+val hashSet = HashSet("Tomatoes", "Chilies")
+println(hashSet + "Coriander")
+```    
+
+　　Scala另一个有用的集合类是Map。跟集类似，Scala也提供了Map的可变和不可变版本，用类继承关系来区分。下面是创建并初始化一个可变的映射：    
+```scala
+import scala.collection.mutable
+
+val treasureMap = mutable.Map[Int, String]()
+treasureMap += (1 -> "Go to island.")
+treasureMap.+=(2 -> "Find big X on ground.")
+treasureMap += (3 -> "Dig.")
+println(treasureMap(2))
+```    
+　　正如之前所述，Scala编译器会将二元的操作，如3->"Dig."，转换成标准的方法调用，即(3).->("Dig.")。**可以在Scala的任何对象上调用这个->方
+法，它将返回包含键和值两个元素的元组**。    
+
+　　如果是不可变的映射，则不需要任何引入：    
+```scala
+val romanNumeral = Map(
+  1 -> "I", 2 -> "II", 3 -> "III", 4 -> "IV", 5 -> "V"
+)
+println(romanNumeral)
+```    
+
+***    
+
 
 

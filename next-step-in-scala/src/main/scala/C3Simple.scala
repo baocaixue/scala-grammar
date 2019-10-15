@@ -4,6 +4,10 @@ object C3Simple {
     parameterize()
 
     useList()
+
+    println("tuple._1 >> " + useTuple()._1)
+
+    useSetAndMap()
   }
 
   def parameterize(): Unit = {
@@ -40,6 +44,30 @@ object C3Simple {
     println("oneTwo init >> " + oneTwo.init)
     println("threeFour mkString >> " + threeFour.mkString("<"))
     println("oneTwoThreeFour sortWith desc >> " + oneTwoThreeFour.sortWith((a,b) => a > b))
+    println()
+  }
+
+  def useTuple(): (String, Int)= {
+    println(">>>>>>>>>>>>>>>>")
+    ("test",1)
+  }
+
+  def useSetAndMap(): Unit = {
+    println(">>>>>>>>>>>>>>>>")
+    var jetSet = Set("Boeing", "Airbus")
+    jetSet += "Lear"//jetSet = jetSet + "Lear"
+    println("immutable.Set += is jetSet = jetSet + \"Lear\" >> " + jetSet)
+    val movieSet = scala.collection.mutable.Set("Hitch", "Poltergeist")
+    movieSet += "shrek"//movieSet.+=("shrek")
+    println("mutable.Set += is movieSet.+=(\"shrek\") >> " + movieSet)
+
+    val treasureMap = scala.collection.mutable.Map[Int, String]()
+    treasureMap += (1 -> "Go to island.")
+    treasureMap.+=(2 -> "Find big X on ground.")
+    treasureMap += (3 -> "Dig.")
+    println("scala.collection.mutable.Map(2) >> " + treasureMap(2))
+
+    println("call \"key\".->(1) >> " + ("key" -> 1))
     println()
   }
 
