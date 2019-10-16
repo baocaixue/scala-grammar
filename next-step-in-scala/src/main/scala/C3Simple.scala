@@ -1,3 +1,4 @@
+import scala.io.Source
 
 object C3Simple {
   def main(args: Array[String]): Unit = {
@@ -8,6 +9,10 @@ object C3Simple {
     println("tuple._1 >> " + useTuple()._1)
 
     useSetAndMap()
+
+    printArgs(Array("hello", ",", "world", "!"))
+
+    readTextFile("/home/isaac/dev/code/IdeaProjects/scala-grammar/next-step-in-scala/target/classes/test.txt")
   }
 
   def parameterize(): Unit = {
@@ -69,6 +74,21 @@ object C3Simple {
 
     println("call \"key\".->(1) >> " + ("key" -> 1))
     println()
+  }
+
+  def printArgs(args: Array[String]) = args.mkString("\n")
+
+  def readTextFile(fileName: String): Unit = {
+    assert(!fileName.isEmpty)
+    def widthOfLength(line: String) = line.length.toString.length
+    val source = Source.fromFile(fileName)
+    val lines = source.getLines().toList
+    val maxWidth = widthOfLength(lines.reduceLeft((a,b) => if(a.length>b.length)a else b))
+    lines.foreach(line => {
+      val padding = " " * (maxWidth - widthOfLength(line))
+      println(padding + line.length + " | " + line)
+    })
+    source.close()
   }
 
 }
