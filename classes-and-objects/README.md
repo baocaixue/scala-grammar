@@ -179,3 +179,46 @@ ChecksumAccumulator.calculate("Every value is an object.")`
 等。    
 
 *** 
+## Scala-Application    
+　　要运行一个Scala程序，必须提供一个独立对象的名称。这个独立对象需要包含一个main方法，该方法接收一个Array\[String\]作为参数，结果类型为
+Unit。任何带有满足正确签名的main方法的独立对象都能被用作应用程序的入口。如下所示：    
+```scala
+//位于Summer.scala文件中
+import com.isaac.ch4.class_and_object.ChecksumAccumulator.calculate
+object Summer {
+  def main(args: Array[String]): Unit = {
+    for (arg <- args) {
+      println(arg + ": " + calculate(arg))
+    }  
+  }
+}
+```     
+　　单例对象的名称是Summer。它的main方法带有正确的签名，因此可以将它当作应用程序来使用。文件中的第一条语句引入了前面例子中的ChecksumAccumulator
+对象中定义的calculate方法。main方法的方法体只是简单的打印每个参数，以及参数的校验和，以冒号隔开。    
+
+　　**注意：**    
+　　Scala在每一个Scala源码文件都隐式地引入了java.lang和scala包的成员，以及名为Predef的单例对象的所有成员。位于scala包的Predef包含很多
+有用的方法。比如，当你在Scala源码中使用println时，实际上调用了Predef的println（Predef.println转而调用Console.println，执行具体的操作）。
+而当使用assert时，实际上是调用了Predef.assert。    
+
+　　要运行Summer这个应用程序，可以把示例代码放入名为Summer.scala的文件中。因为Summer也用到了ChecksumAccumulator，需要将ChecksumAccumulator
+类和它的伴生对象放入名为ChecksumAccumulator.scala文件中。    
+
+　　Scala和Java的区别之一，是Java要求将公共的类放入和类同名的文件中，而Scala中可以任意命名.scala文件。不过，通常对于那些非脚本的场景，把类
+放入以类名为文件名.scala文件中是比较合适的。    
+
+　　ChecksumAccumulator.scala和Summer.scala都不是脚本，因为它们都是以定义结尾的。而脚本则不同，必须以一个可以计算出结果的表达式结尾。因
+此，如果尝试以脚本的方式运行Summer.scala，解释器会报错，提示Summer.scala不是以结果表达式结尾。需要用Scala编译器实际编译这些文件，然后运
+行编译出来的类。编译的方式之一，是使用scalac这个基础的Scala编译器，就像这样：`scalac ChecksumAccumulator.scala Summer.scala`    
+
+　　这将编译源文件，不过在编译结束之前，可能会有一个比较明显的延迟。这是因为每一次编译器启动都会花时间扫描jar文件的内容以及执行其他一些初始化
+工作，然后才开始关注提交给它的新的源码文件。因为这个原因，Scala的分发包还包含了一个名为fsc的Scala编译器的守护进程（daemon）。使用方式如下：
+`fsc ChecksumAccumulator.scala Summer.scala`    
+
+　　第一次运行fsc，它会创建一个本地的服务器守护进行，绑定到计算机的某个端口上。然后，它会通过这个端口将需要编译的文件发送给这个守护进程。下一
+次运行fsc的时候，这个守护进程已经在运行了，所以fsc会简单地将文件清单发给这个守护进程，然后守护进程就会立即编译这些文件。使用fsc，只有在首次
+运行时才需要等待Java运行时启动。如果想要停止fsc这个守护进程，可执行fsc -shutdown。    
+
+　　不论是运行scalac还是fsc命令，都会产出Java类文件，这些类文件可以用scala命令来运行。不过，跟之前运行那些带有Scala代码的.scala文件不同，
+在这个使用场景下，包含了符合正确签名要求的main方法的独立对象的名字。因此，可以用下面的命令来运行Summer这个程序：`$ scala Summer test`    
+
