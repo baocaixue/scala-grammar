@@ -133,3 +133,49 @@ z
 　　3. 当前行的行尾出现在圆括号(...) 或方括号 \[...\]内。    
 
 ***    
+## Singleton-Objects    
+　　Scala比Java更面向对象的一点，是Scala类不允许有静态（static）成员。对此类使用场景，Scala提供了*单例对象（singleton object）*。单例
+对象的定义看上去跟类定义很像，只不过class关键字换成了**object**关键字。参考示例如下：    
+```scala
+//位于ChecksumAccumulator.scala文件中
+import scala.collection.mutable
+object ChecksumAccumulator {
+  private val cache = mutable.Map.empty[String, Int]
+
+  def calculate(s: String): Int = {
+    if (cache.contains(s))
+      cache(s)
+    else {
+      val acc = new ChecksumAccumulator
+      for (c <- s)
+        acc.add(c.toByte)
+      val cs = acc.checksum()
+      cache += (s -> cs)
+      cs
+    } 
+  }
+}
+```    
+　　示例中单例对象名叫ChecksumAccumulator，跟前面一个例子中的类名一样。**当单例对象跟某个类共用同一个名字时，它被乘坐这个类的伴生对象（
+companion object）**。必须在同一个源码文件中定义类和类的伴生对象。同时，类又叫做这个单例对象的伴生类（companion class）。类和它的伴生对象
+可以互相访问对方的私有成员。    
+
+　　ChecksumAccumulator单例对象有一个名为calculate的方法，接收一个String，计算这个String的所有字符的校验和（checksum）。它同样有一个
+私有的字段，cache，这是一个缓存了之前已计算过的校验和。    
+
+　　可以把单例对象当做是用于安置那些用Java时打算编写的静态方法。可以用类似的方式来访问单例对象的方法：单例对象名、英文句点和方法名。例如：`
+ChecksumAccumulator.calculate("Every value is an object.")`    
+
+　　不过，单例对象并不仅仅是用来存放静态方法。它是一等的对象。可以把单例对象的名称想象成附加在对象身上的“名字标签”。    
+　　定义单例对象并不会定义类型（在Scala的抽象层级上是这样的）。当只有ChecksumAccumulator的对象定义时，并不能定义一个类型为ChecksumAccumulator
+的变量。确切的说，名为ChecksumAccumulator的类型是由这个单例对象的伴生类来定义的。不过，单例对象可以扩展自某个超类，还可以混入特质，可以通过
+这些类型来调用它的方法，用这些类型的变量来引用它，还可以将它传入那些预期这些类型的入参的方法当中。    
+
+　　类和单例对象的一个区别是单例对象不接收参数，而类可以。由于没法用new实例化单例对象，也就没有任何手段向它传参。每个单例对象都是通过一个静态
+变量引用合成类（synthetic class）的实例来实现的，因此单例对象从初始化的语义上和静态成员是一致的。尤其体现在，单例对象代码首次访问时才被初始
+化。    
+
+　　没有同名的伴生类的单例对象称为*孤立对象（standalone object）*。孤立对象有很多用途，包括将工具方法归集在一起，或定义Scala应用程序的入口
+等。    
+
+*** 
