@@ -220,5 +220,19 @@ object Summer {
 运行时才需要等待Java运行时启动。如果想要停止fsc这个守护进程，可执行fsc -shutdown。    
 
 　　不论是运行scalac还是fsc命令，都会产出Java类文件，这些类文件可以用scala命令来运行。不过，跟之前运行那些带有Scala代码的.scala文件不同，
-在这个使用场景下，包含了符合正确签名要求的main方法的独立对象的名字。因此，可以用下面的命令来运行Summer这个程序：`$ scala Summer test`    
+在这个使用场景下，包含了符合正确签名要求的main方法的独立对象的名字。因此，可以用下面的命令来运行Summer这个程序：`$ scala Summer test`        
+
+***
+## App-Trait    
+　　Scala提供了一个特质scala.App，帮助节省重复的代码输入。示例如下：    
+```scala
+import  com.isaac.ch4.class_and_object.ChecksumAccumulator.calculate
+
+object FallWinterSpringSummer extends App {
+  for (season <- List("fail", "winter", "spring")) 
+    println(season)
+}
+```    
+　　要使用这个特质，首先需要在定义的单例对象后加上“extends App”。然后，并不是直接编写main方法，而是将打算放在main方法里大代码直接写在单例
+对象的花括号中。可以通过名为args的字符串数组来访问命令行参数。可像任何其他应用程序一样来编译和运行它。    
 
