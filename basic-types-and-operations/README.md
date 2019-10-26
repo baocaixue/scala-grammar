@@ -174,5 +174,64 @@ indexOf就是操作符了，因为使用的是操作符表示法。
 　　-1>>>31   (1111 1111 1111 1111 1111 1111 1111 1111) ---> 无符号右移31位（填充0），1    
 　　1<<2      (0000 0000 0000 0000 0000 0000 0000 0001) ---> 左移2位（填充0），4    
 ***    
+## Object-Equality    
+　　Scala对象相等性的比较可以使用`==`、`!=`，可以被应用于所有的对象，并不仅仅是基础类型。`==`的实现，背后的规则很简单：首先检查左侧是否为
+null，如果不为null，调用equals方法。由于equals是个方法，确切的比较逻辑取决于左侧参数的类型。    
+　　与Java的区别：Java中`==`对于基本类型而言是值的相等性比较，与Scala一样;而对于引用类型，Java比较的是引用相等性，意思是两个变量指向JVM
+堆上的同一个对象。Scala也提供了用于比较引用相等性的机制，即名为*eq*方法。不过，eq和跟它对应的ne只对那些直接映射到Java对象的对象有效。    
+
+***    
+## Operator-Precedence-Associativity    
+操作符优先级    
+
+| 优先级递减 |     
+| ---     
+| （所有其他特殊字符）    
+| * / %    
+| + -    
+| :    
+| = !    
+| < >    
+| &    
+| ^    
+| |    
+| （所有字母）    
+| (所有赋值操作符)    
+
+
+***    
+#Rich-Wrappers    
+　　还可以对Scala的基础类型调用更多的方法，如下表给出的一些例子。这些方法可以通过**隐式转换（implicit conversion）** 得到。这里提到的每
+个基础类型，都有一个对应的“富包装类”，提供了额外的方法。    
+    
+一些富操作    
+
+| 代码 | 结果    
+| --- | ---     
+| 0 max 5 | 5    
+| 0 min 5 | 0    
+| -2.7 abs | 2.7    
+| -2.6 round | -3L    
+| 1.5 isInfinity | false    
+| (1.0 / 0) isInfinity | true    
+| 4 to 6 | Range(4,5,6)    
+| "bob" capitalize | "Bob"    
+| "robert" drop 2 | "bert"    
+    
+富包装类    
+
+| 基础类型 | 富包装类    
+| --- | ---    
+| Byte | scala.runtime.RichByte    
+| Short | scala.runtime.RichShort    
+| Int | scala.runtime.RichInt    
+| Long | scala.runtime.RichLong    
+| Char | scala.runtime.RichChar    
+| Float | scala.runtime.RichFloat    
+| Double | scala.runtime.RichDouble    
+| Boolean | scala.runtime.RichBoolean    
+| String | scala.collection.immutable.StringOps    
+    
+  
 
 
