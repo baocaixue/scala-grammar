@@ -15,6 +15,7 @@
         <module>next-step-in-scala</module>
         <module>classes-and-objects</module>
         <module>basic-types-and-operations</module>
+        <module>functional-objects</module>
     </modules>
 
     <properties>
