@@ -69,4 +69,90 @@ def gcd(x: Long, y: Long): Long = if (y == 0) x else gcd(y, x % y)
 
 ***    
 
+## For-Expressions    
+　　Scala的for表达式让你以不同的方式组合一些简单的因子来表达各式各样的迭代。它可以帮助我们处理诸如便利整数序列等常见任务，也可以通过更高级
+的表达式来遍历多个不同种类的集合，根据任意条件过滤元素，产出新的集合。    
+
+### 遍历集合    
+　　如示例所示，使用for表达式遍历当前目录的所有文件：    
+```scala
+import java.io.File
+  val files = new File(".").listFiles
+  for (file <- files) {
+    println(file.getName)
+  }
+```    
+　　通过`file <- files`这样的生成器语法，将遍历files的元素。每一次迭代，一个新的名为file的val都会被初始化成一个元素的值。编译器推断出文件
+的类型为File，这是因为files是个Array\[File\]。    
+　　for表达式的语法可以用于任何种类的集合，而不仅仅是数组。Range是一类特殊的用例，可以用`1 to 5`这样的语法来创建Range，如果不想包含区间的
+上界，可以用`1 until 5`这样。需要注意的是，虽然例如`0 to files.length - 1`这样也是支持的，但是没必要将问题复杂化，直接使用` file <- files`
+可以避免不必要的麻烦。    
+
+### 过滤    
+　　有时并不用完整的遍历集合，需要的是满足某些条件的一个子集。这时可以给for表达式添加*过滤器*，过滤器是for表达式的圆括号中的一个if字句。例
+如：    
+```scala
+import java.io.File
+  val files = new File(".").listFiles
+  for (file <- files if file.getName.endsWith("xml")) {
+    println(file.getName)
+  }
+```    
+
+### 嵌套迭代    
+　　如果添加多个`<-`字句，将得到嵌套的“循环”。示例如下，需要注意的是内循环和外循环的生成器（和迭代器）用了分号隔开（圆括号不会自动推断分号），
+可以使用花括号替代圆括号，可以省去分号。    
+```scala
+import java.io.File
+import scala.io.Source
+  val files = new File(".").listFiles
+  //noinspection SourceNotClosed
+  def fileLines(file: File): List[String] = Source.fromFile(file).getLines().toList
+
+  def grep(pattern: String) =
+    for (
+      file <- files
+      if file.getName.endsWith("xml");//notice me
+      line <- fileLines(file)
+      if line.trim.matches(pattern)
+    ) println(file + ":" + line.trim)
+
+  grep(".*scala.*")
+```    
+
+### 中途变量绑定    
+　　可以看到前面的`line.trim`重复了两次，可以将结果绑定到新的变量上，被绑定的这个变量引入和使用起来都和val一样：    
+```scala
+import java.io.File
+import scala.io.Source
+  val files = new File(".").listFiles
+  //noinspection SourceNotClosed
+  def fileLines(file: File): List[String] = Source.fromFile(file).getLines().toList
+
+  def grep(pattern: String) =
+    for {
+      file <- files
+      if file.getName.endsWith("xml")
+      line <- fileLines(file)
+      trimmed = line.trim
+      if trimmed.matches(pattern)
+    } println(file + ":" + trimmed)
+
+  grep(".*scala.*")
+```    
+
+### 产出一个新的集合    
+　　目前为止所有示例都是对遍历到的值进行操作然后忘掉它们，也完全可以在每次迭代中生成一个可以被记住的值。具体做法是在for表达式的代码体之前加
+上关键字`yield`。例如：    
+```scala
+def scalaFiles = 
+    for{
+      file <- files
+      if file.getName.endsWith(".scala")
+    } yield file
+```    
+　　for表达式的代码体每次被执行，都会产出一个值（本例是file）。当for表达式执行完毕后，其结果将包含所有交出的值，包含在一个集合当中。结果集合
+的类型基于迭代子句中处理的集合种类。需要注意的是`yield`的位置，语法如下： **for 子句 yield 代码体**    
+
+***    
 
