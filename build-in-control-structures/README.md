@@ -156,3 +156,74 @@ def scalaFiles =
 
 ***    
 
+## Exception-Handling    
+　　Scala的异常处理跟其他语言类似。方法除了正常地返回某个值之外，也可以通过抛出异常来终止执行。方法的调用方要么捕获并处理这个异常，要么自我
+终止，让异常传播到更上层的调用方。异常通过这种方式传播，逐个展开调用栈，直到某个方法处理该异常或者没有更多方法了为止。    
+
+### 抛出异常    
+　　在Scala中抛出异常跟Java看上去一样。需要创建一个异常对象然后用`throw`关键字将它抛出：`throw new IllegalArgumentException`。虽然看
+上去有些自相矛盾，在Scala中throw是一个有结果类型的表达式，如下是一个带有结果类型的示例：    
+```scala
+val n = 14
+val half = if (n %2 == 0) n / 2 else throw new RuntimeException("n must be even")
+```    
+　　在这段代码中，如果n是偶数，half将被初始化为n的一半。如果n不是偶数，那么在half被初始化之前，就会有异常被抛出。因此，我们可以安全地将抛出
+的异常当作任何类型的值来对待。任何想要使用throw给出的这个返回值的上下文都没有机会真正使用它，也就不必担心有其他的问题。    
+　　技术上讲，抛出异常这个表达式的类型是Nothing。哪怕表达式从不实际被求值，也可以用throw。在这个例子中，if的分支计算出某个值，而另一个分支
+抛出异常并计算出Nothing。整个if表达式的类型就是计算出来某个值的分支的类型。    
+
+### 捕获异常    
+　　可以用下面示例的语法来捕获异常。*catch*子句的语法之所以是这样，为的是与Scala的一个重要组成部分，*模式匹配（pattern matching）*，保持
+一致。    
+```scala
+import java.io.FileReader
+import java.io.FileNotFoundException
+import java.io.IOException
+
+try {
+  val f = new FileReader("input.txt")
+} catch {
+  case ex: FileNotFoundException => //处理找不到文件的情况 
+  case ex: IOException => //处理其他I/O错误
+}
+```    
+　　执行这个try-catch表达式跟其他带有异常处理的语言一样。首先代码体会被执行，如果抛出异常，则会依次尝试每个catch子句。本例中，如果异常的类
+型是FileNotFoundException，第一个子句将被执行。如果异常的类型是IOException，那么第二个子句将被执行。而如果异常既不是FileNotFoundException
+也不是IOException，try-catch将会终止，异常将向上继续传播。注意到Scala跟Java的区别，Scala并不要求捕获受检查异常（checked exception）
+或在throws子句里声明。可以选择用`@throws`注解来声明一个throws子句。    
+
+### finally    
+　　可以将那些不论是否抛出异常都想执行的代码以表达式的形式包含在finally子句里。例如，可能想要确保某个打开的文件要被正确地关闭，哪怕某个方法
+因为抛出了异常而退出：    
+```scala
+import java.io.FileReader
+//贷出模式 可以更精简地达到相同的目的
+val file = new FileReader("input.txt")
+try {
+  //使用文件
+} finally {
+  file.close()
+}
+```    
+
+### 交出值    
+　　跟Scala的大多数其他控制结构一样，try-catch-finally最终返回一个值。例如下面的示例展示了如何做到解析URL，但当URL格式有问题时返回一个
+默认值。如果没有异常抛出，整个表达式的结果就是对应的catch子句的结果;而如果有异常抛出但没有被捕获，整个表达式就没有结果。如果有finally子句，
+该子句计算出来的值会被丢弃。finally子句一般都是执行清理工作，比如关闭文件。通常来说，它们不应该改变代码主体或catch子句中计算出来的值。    
+　　需要注意的是Scala的行为和Java不同，仅仅是因为Java的try-finally并不返回某个值。跟Java一样，当finally子句包含一个显式的返回语句，或
+抛出某个异常，那么这个返回值或异常将会“改写”任何在之前的try代码块或catch子句中产生的值。    
+```scala
+import java.net.URL
+import java.net.MalformedURLException
+
+def urlFor(path: String) = 
+    try {
+      new URL(path)
+    } catch {
+      case e: MalformedURLException =>
+        new URL("http://www.google.com")
+    } 
+```    
+
+***    
+
