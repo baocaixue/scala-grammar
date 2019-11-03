@@ -4,7 +4,7 @@
 - for表达式...................................................[3](#For-Expressions)
 - 用try表达式实现异常处理...................................................[4](#Exception-Handling)
 - match表达式...................................................[5](#Match-Expressions)
-- 没有break和continue的日子...................................................[6](#Without-Break-And-Contine)
+- 没有break和continue的日子...................................................[6](#Without-Break-And-Continue)
 - 变量作用域...................................................[7](#Variable-Scope)
 - 对指令式代码进行重构...................................................[8](#Refactoring-ImperativeStyleCode)
 
@@ -250,3 +250,63 @@ firstArg match {
 
 ***    
 
+## Without-Break-And-Continue    
+　　Scala去掉了break和continue这两个命令，因为它们跟函数字面量不搭。而解决方式，最简单的是用if换掉每个continue，用布尔值换掉每个break。
+布尔值表示包含它的while是否继续。例如，假定需要检索参数列表，找一个以“.scala”结尾但不以连字符（hyphen）开头的字符串。用Java的话可能会这样
+写：    
+```java
+int i = 0;
+boolean foundIt = false;
+while(i < args.length) {
+    if (args[i].startsWith("-")){
+        i = i + 1;
+        continue;
+    }
+    if (args[i].endsWith(".scala")) {
+        foundIt = true;
+        break;
+    }
+    i = i + 1;
+}
+```    
+　　如果要将这段Java代码直接翻译成Scala，可以把先if再continue的写法改成用if将整个while循环体剩余的部分包起来。为了去掉break，通常会添加
+一个布尔值的变量，表示是否要继续循环，不过在本例中可以直接复用foundIt。代码如下：    
+```scala
+var i = 0
+var foundIt = false
+while (i < args.length && !foundIt) {
+  if (!args(i).startsWith("-")) {
+    if (args(i).endsWith(".scala")) {
+      foundIt = true;
+    }
+  }
+  i = i + 1
+}
+```    
+　　如果想去掉示例中的var，一种做法是将循环重写为递归的函数：    
+```scala
+def searchFrom(i: Int): Int =
+    if (i > args.length) -1
+    else if (args(i).startsWith("-")) searchFrom(i + 1)
+    else if (args(i).endsWith(".scala")) i
+    else searchFrom(i + 1)
+val i = searchFrom(0)
+```    
+　　上面示例采用了对人来说有意义的函数名，并且使用递归替换掉了循环。每一个continue都替换成以i+1作为入参的递归调用，从效果上讲跳到下个整数
+值。    
+　　如果觉得仍要使用break，Scala标准类库也提供了帮助。scala.util.control的Break类给出了一个break方法，可以用来退出包含它的用breakable
+标记的代码块：    
+```scala
+import scala.util.control.Breaks._
+import java.io._
+
+val in = new BufferedReader(new InputStreamReader(System.in))
+breakable {
+  while (true) {
+    println("? ")
+    if (in.readLine() == "") break
+  }
+}
+```    
+
+***
