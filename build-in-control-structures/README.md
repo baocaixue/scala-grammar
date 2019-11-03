@@ -227,3 +227,26 @@ def urlFor(path: String) =
 
 ***    
 
+## Match-Expressions    
+　　Scala的match表达式让你从若干可选项中选择，就像其他语言中的switch语句那样。一般而言，match表达式让你用任意的模式来选择。来看一个例子，
+先吗的脚本从参数列表中读取食物名称并打印出这个食物的搭配食材。这个match表达式首先检查firstArg，这个变量对应的是参数列表的首个参数。如果是
+字符串“salt”，打印“pepper”;如果是“chips”，打印“salsa”;以此类推。缺省的样例以下划线（_）表示，这个通配符在Scala中经常被用来表示某个完全
+不知道的值。    
+```scala
+val args = Array()
+val firstArg = if (args.length > 0) args(0) else ""
+firstArg match {
+  case "salt" => println("pepper")
+  case "chips" => println("salsa")
+  case "eggs" => println("bacon")
+  case _ => println("huh?")
+}
+```    
+　　Scala的match表达式跟Java的switch相比，有一些重要的区别。其中一个区别是任何常量、字符串等都可以用作样例，而不仅限于Java的case语句支
+持的整型、枚举和字符串常量。在上面示例中，可选项是字符串。另一个区别是在每个可选项的最后并没有break。在Scala中break是隐含的，并不会出现某
+个可选项执行完继续执行下一个可选项的情况。    
+　　不过Scala的match表达式和Java的switch相比最显著的不同，在于match表达式会返回值。在前一例中，match表达式的每个可选项都打印出一个值。如
+果将打印语句换成交出某个值，相应的代码依然能工作。    
+
+***    
+

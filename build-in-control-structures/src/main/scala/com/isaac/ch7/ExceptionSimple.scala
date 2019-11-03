@@ -7,6 +7,8 @@ object ExceptionSimple {
     throwDemo(6)
 
     println(catchDemo("test.txt"))
+
+    matchDemo("")
   }
 
   @throws
@@ -21,4 +23,12 @@ object ExceptionSimple {
       case ex: IOException => "IO Exception"
     }
   }
+
+  def matchDemo(arg: String) =
+    arg match {
+      case "salt" => println("pepper")
+      case "chips" => println("salsa")
+      case "eggs" => println("bacon")
+      case _ => println("hun?")
+    }
 }
