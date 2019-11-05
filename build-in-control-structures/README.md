@@ -309,4 +309,54 @@ breakable {
 }
 ```    
 
-***
+***    
+
+## Variable-Scope    
+　　Scala的作用域规则几乎跟Java完全一样。Java和Scala的一个区别是Scala允许在嵌套的作用域内定义同名的变量。Scala程序的变量在声明时附带了一
+个规定在哪里能使用这个名称的作用域。关于作用域做常见的例子是花括号一般都会引入一个新的作用域，因此任何在花括号的中定义的元素都会在花括号之后
+离开作用域。    
+```scala
+  def printMultiTable() = {
+    var i = 1
+    //只有i在作用域内
+    while (i <= 10) {
+      var j = 1
+      //i和j在作用域内
+      while (j <= 10) {
+        val prod = (i * j).toString
+        //i、j和prod在作用域内
+        var k = prod.length()
+        //i、j、prod和k在作用域内
+        while (k < 4) {
+          print(" ")
+          k += 1
+        }
+        print(prod)
+        j += 1
+      }
+      //i和j仍在作用域内，prod和k超出了作用域
+      println()
+      i += 1
+    }
+    //i仍在作用域内，j、prod和k超出了作用域
+  }
+```    
+　　变量一旦定义好，就不能在相同的作用域内定义相同名字的新变量。如下代码不能通过编译：    
+```scala
+val a = 1
+val a = 2 //不能通过编译
+```    
+　　不过，可以在一个内嵌的作用域内定义一个跟外部作用域中相同名称的变量。如下所示：    
+```scala
+val a = 1
+{
+  val a = 2
+  println(a)
+}
+println(a)
+```    
+
+***    
+
+## Refactoring-ImperativeStyleCode    
+　　
