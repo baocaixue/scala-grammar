@@ -17,6 +17,7 @@
         <module>basic-types-and-operations</module>
         <module>functional-objects</module>
         <module>build-in-control-structures</module>
+        <module>functions-and-closures</module>
     </modules>
 
     <properties>
