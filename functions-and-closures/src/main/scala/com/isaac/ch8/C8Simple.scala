@@ -6,9 +6,21 @@ object C8Simple {
     println(demo(12))
 
     println(test(demo))
+
+    filterSimple()
   }
 
   def test(function1: (Int) => Int)= {
     function1.apply(1)
   }
+
+  def filterSimple() = {
+    val list = List(1,2,3,4,5,6,7,8,9)
+    list.filter(_>5).foreach(println)
+
+    val a = sum _
+    a(1,2,3)
+  }
+
+  def sum(a: Int, b: Int, c: Int) = a + b + c
 }
