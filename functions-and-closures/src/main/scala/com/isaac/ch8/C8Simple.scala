@@ -8,6 +8,8 @@ object C8Simple {
     println(test(demo))
 
     filterSimple()
+
+    closures()
   }
 
   def test(function1: (Int) => Int)= {
@@ -23,4 +25,10 @@ object C8Simple {
   }
 
   def sum(a: Int, b: Int, c: Int) = a + b + c
+
+  def closures()={
+    val more = 1
+    val c = (x: Int) => x + more
+    println(c(9))
+  }
 }
