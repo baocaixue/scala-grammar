@@ -101,4 +101,42 @@ object FileMather {
 
 ***    
 
+## Simplifying-Client-Code    
+　　高阶函数的另一个重要的用处是将高阶函数本身放在API当中让调用方代码更加精简。Scala集合类型提供的特殊用途的循环方法是一个很好的例子。exists
+这个方法用于判定某个集合是否包含传入的值。当然可以通过如下方式来查找元素：初始化一个var为false，用循环遍历整个集合检查每一项，如果发现要找
+的内容，就把var设为true。参数下面代码，判定传入的List是否包含负数：    
+```scala
+def containsNeg(nums: List[Int]): Boolean = {
+  var exist = false
+  for (num <- nums; if num < 0) exist = true
+  exist
+}
+```    
+　　不过更精简的定义方式是对传入的List调用高阶函数exists，就像这样：    
+```scala
+def containsNeg(nums: List[Int]) = nums.exists(_ < 0)
+```    
+　　这个exists方法代表了一种控制抽象。这是Scala类库提供的一个特殊用途的循环结构，并不是像while或for那样是语言内建的。与前面提供的函数filesMatching
+类似，exists也帮助哦我们减少了代码的重复，不过由于exists是Scala集合API中的公共函数，它减少的是API使用方的代码重复。    
 
+***    
+
+## Currying    
+　　Scala允许创建新的控制抽象，“感觉就像语言原生支持的那样”。为了搞清楚如何做出那些用起来感觉像是语言扩展的控制抽象，首先需要理解一个函数式
+编程技巧，那就是**柯里化（currying）**。    
+　　一个经过柯里化的函数在应用时支持多个参数列表，而不是只有一个。这个示例展示了一个没有经过柯里化的函数，对两个Int参数x和y做加法：`def 
+plainOldSum(x: Int, y: Int) = x + y`。将这个函数经过柯里化：`def curriesSum(x: Int)(y: Int) = x + y`，跟使用一个包含两个Int参数
+列表不同，应用这个函数到两个参数列表。当使用`curriedSum(1)(2)`时，实际上是连着做了两次传统的函数调用。地一个调用接收了一个名为x的Int参数，
+返回一个用于第二次调用的函数值，这个函数接收一个Int参数y。可以参考下面这个名为first的函数（这是一个传统的未经过柯里化的函数）：    
+```scala
+def first(x: Int) = (y: Int) => x + y
+```    
+　　从原理上讲它和经过柯里化的carriedSum是一样的。把first应用到1：`val second = fist(1)`这时second的类型是`Int => Int = <function1>`。
+应用第二个函数到2：`second(2)`这将得到结果`Int = 3`。这里的first和second函数只是对柯里化过程的示意，它们和curriedSum函数并不直接相关。
+尽管如此，还是可以获取到指向curriedSum的“第二个”函数的引用：    
+```shell script
+val onePlus = curriedSum(1)_
+onePlus: Int => Int = <function1>
+```    
+
+***    
