@@ -140,3 +140,72 @@ onePlus: Int => Int = <function1>
 ```    
 
 ***    
+## Writing-New-Control-Structures    
+　　 在拥有一等函数的语言中，可以有效地制作出新的控制i接口，尽管语言语法是固定的。需要做的就是*创建接收函数作为入参的方法*。例如下面这个
+“twice”控制结构，它重复某个操作两次，并返回结果：    
+```scala
+def twice(op: Double => Double, x: Double) = op(op(x))
+
+twice(_ + 1, 6) == 8.0
+```    
+　　每当发现某个控制模式在代码中多处出现，就应该考虑将这个模式实现为新的控制结构。前面看到fileMatching这个非常特殊的控制模式，现在来看一个
+更加常用的编码模式：打开某个资源，对它进行操作，然后关闭这个资源。可以用类似如下的方法，将这个模式捕获成一个控制抽象：    
+```scala
+def withPrintWriter(file: java.io.File, op: java.io.PrintWriter => Unit) = {
+  val writer = new java.io.PrintWriter(file)
+  try {
+    op(writer)
+  } finally {
+    writer.close()
+  }
+}
+
+//use
+withPrintWriter(
+  new java.io.File("data.txt"),
+  writer => writer.println(new java.util.Date())
+)
+```    
+　　使用这个方法的好处是，确保文件最后被关闭的是withPrintWriter而不是用户代码。因此不可能出现使用者忘记关闭文件的情况。这个技巧被称做*贷出模式（loan pattern）*，
+因为是某个控制抽象函数，，比如withPrintWriter，打开某个资源并将这个资源“贷出”给函数。当函数完成时，它会表明自己不再需要这个“贷入”的资源。
+这时这个资源就在finally代码块中被关闭了，这样能确保不论函数是正常返回还是抛出异常，资源都会被正常关闭。    
+　　可以用花括号而不是圆括号来表示参数列表，这样调用方的代码看上去是在使用内建的控制结构。在Scala中，只要有那种只传入*一个参数*的方法调用，都
+可以选择使用花括号将入参包起来：`println {"Hello World!"}`。    
+　　Scala允许用花括号替代圆括号来传单个入参的目的是为了让调用方程序员在花括号中编写函数字面量。而对于多个参数的函数，可以通过将函数进行柯里化
+来达到这个目的：     
+```scala
+def withPrintWriter(file: java.io.File)(op: java.io.PrintWriter => Unit) = {
+  val writer = new java.io.PrintWriter(file)
+  try {
+    op(writer)
+  } finally {
+    writer.close()
+  }
+}
+
+//use
+withPrintWriter(new java.io.File("data.txt")){ writer =>
+  writer.println(new java.util.Date())
+}
+```    
+
+***    
+## ByName-Parameters
+```scala
+var assertionsEnabled = true
+
+def myAssert(predicate: () => Boolean) = 
+    if (assertionsEnabled && !predicate()) throw new AssertionError()
+
+def myAssert(predicate: => Boolean) = 
+    if (assertionsEnabled && !predicate) throw new AssertionError()
+
+def boolAssert(predicate: Boolean) = 
+    if (assertionsEnabled && !predicate) throw new AssertionError()
+
+//
+assertionsEnabled = false
+myAssert(5/0 == 0) //nothing
+myAssert(() => 5/0 == 0) //noting
+boolAssert(5/0 == 0) //by zero exception
+```
