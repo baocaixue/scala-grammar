@@ -19,6 +19,7 @@
         <module>build-in-control-structures</module>
         <module>functions-and-closures</module>
         <module>control-abstraction</module>
+        <module>composition-and-inheritance</module>
     </modules>
 
     <properties>
