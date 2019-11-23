@@ -42,4 +42,18 @@ hello ***
 设计就走在正轨上。    
 
 ***    
+## Abstract-Classes    
+　　首先要定义Element类型，用来表示元素。由于元素是一个由字符组成的二维矩阵，用一个成员contents来表示某个布局元素的内容。内容可以用字符串
+的数组表示，每个字符串代表一行。因此，由contents返回的结果类型将会是Array[String]：    
+```scala
+abstract class Element {
+  def contents: Array[String]
+}
+```    
+　　这个类中，contents被声明为一个没有实现的方法。换句话说，这个方法是Element类的*抽象*成员。一个包含抽象成员的类本身也要声明为抽象的，做
+法是在class关键字前加上abstract修饰符，和Java一样抽象类也是不能直接实例化的。可以创建Element的子类，这些子类是可以实例化的。    
+　　需要注意，Element类中的contents方法并没有标上abstract修饰符。一个方法只要没有实现（即没有等号或方法体），那么它就是抽象的。跟Java不
+同，不需要（也不能）对方法加上abstract修饰符。那些给出了实现的的方法叫做*具体（concrete）* 方法。另一组在叫法上的区分是*声明*和*定义*。
+Element类声明了contents这个抽象方法，但目前没有定义具体的方法。下面，将通过定义一些具体的方法来增强Element。    
 
+***    
