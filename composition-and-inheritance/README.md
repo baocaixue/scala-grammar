@@ -57,3 +57,38 @@ abstract class Element {
 Element类声明了contents这个抽象方法，但目前没有定义具体的方法。下面，将通过定义一些具体的方法来增强Element。    
 
 ***    
+## Defining-Parameterless-Methods
+　　现在，我们将给Element添加方法来获取它的宽度和高度，如下所示。height方法返回contents中的行数。而width方法返回第一行的长度，如果完全
+没有内容则返回0。    
+```scala
+abstract class Element {
+  def contents: Array[String]
+  def height: Int = contents.length
+  def width: Int = if (height == 0) 0 else contents(0).length
+}
+```    
+　　注意，Element的三个方法无一例外都没有参数列表，连空参数列表都没有。这样的*无参方法（parameterless method）* 在Scala中很常见。于此对
+应，那些用空的圆括号定义的方法，如`def height(): Int`被称作*空圆括号方法（empty-paren method）* 。推荐的做法是*对没有参数且只通过读取
+所在对象字段方式访问可变状态（确切地说不改变状态）的情况下尽量使用无参方法*。这样的做法支持所谓的*统一访问原则*：使用方代码不应该收到某个属
+性是用字段还是用方法实现的影响。    
+　　举例来说，完全可以吧width和height实现成字段，而不是方法，只要将定义中的def换成val即可：    
+```scala
+abstract class Element {
+  def contents: Array[String]
+  val height: Int = contents.length
+  val width: Int = if (height == 0) 0 else contents(0).length
+}
+```    
+　　从使用方代码看，这组定义完全等价。唯一的区别是字段访问可能比方法调用略快，因为字段值在类初始化时就被预先计算好，而不是每次方法调用时重新
+计算。另一方面，字段需要每个Element对象为其分配额外的内存空间。因此属性实现为字段好还是方法好，这个问题取决于类的用法，而用法可以随着时间变
+化而变化的。核心点在于Element类的使用方不应爱被内部实现的变化所影响。具体来说，当Element的某个字段被改成访问函数时，Element的使用方代码不需要被重新编写，只要这个访问函数是纯的（即它没有副作用也不依赖于可变
+状态）。使用方代码不需要关心究竟是哪一种实现。    
+　　但现在有一个问题，这跟Java处理细节有关。Java并没有实现统一访问原则。因此Java中要写`string.length()`而不是`string.length`，而对于
+数组要写`array.length`而不是`array.length()`，这让人很困扰。为了更好地桥接这两种写法，Scala对于混用无参方法和空括号方法的处理非常灵活。
+具体来说，可以用空括号方法重写无参方法，反过来也可以。还可以在调用某个不需要入参的方法时省去空括号。    
+　　从原理上讲，可以对Scala所有无参函数调用都去掉空括号。不过，仍然建议在被调用的方法不仅代表接收该调用的对象的某个属性时加上空括号。举例来说，
+空括号的场景包括该方法执行I/O、写入可冲ixn赋值的变量var、读取接收该调用对象字段之外的var（不论是直接还是间接地使用了可变对象）。这样以来，
+参数列表就可以作为一个视觉上的线索，告诉我们调用触发了某个有趣的计算。    
+　　总结下来就是，Scala鼓励我们将那些不接收参数也没有副作用的方法定义为无参方法。同时，对有副作用的方法，不应该省去空括号。    
+
+***    
