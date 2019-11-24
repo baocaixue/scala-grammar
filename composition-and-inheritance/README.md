@@ -92,3 +92,30 @@ abstract class Element {
 　　总结下来就是，Scala鼓励我们将那些不接收参数也没有副作用的方法定义为无参方法。同时，对有副作用的方法，不应该省去空括号。    
 
 ***    
+## Extending-Classes    
+　　我们仍然需要某种方式创建新的元素对象。已知“new Element”是不能用的，因为Element类是抽象的。因此，要实例化一个元素，需要创建一个扩展自
+Element的子类，并实现contents这个抽象方法：    
+```scala
+class ArrayElement(conts: Array[String]) extends Element {
+  def contents: Array[String] = conts
+}
+```    
+　　ArrayElement类被定义为扩展自Element类。跟Java一样，可以在类名后用extends子句来表达。这样的extends子句有两个作用：它使得ArrayElement
+类从Element类继承所有非私有成员，并且它也让ArrayElement的类型成为Element类型的子类型。由于ArrayElement扩展自Element，ArrayElement类
+被称作Element类的子类。反过来讲，Element是ArrayElement的超类。如果去掉extends子句，Scala编译器会默认假定你的类扩展自**scala.AnyRef**
+这对应到Java平台跟*java.lang.Object*相同。因此，Element类默认也扩展自AnyRef类。    
+　　*继承（inheritance）* 的意思是超类的所有成员也是子类的成员，但是有两个例外：一个是私有成员并不会被子类继承;二是如果子类里已经实现了相同
+名称和参数的成员，那么该成员不会被继承（*重写*）。而对于超类中的抽象成员，子类需要*实现*这个抽象的成员。    
+　　例如,ArrayElement里的contents方法实现了Element的抽象方法contents。与此不同的是，ArrayElement类从Element类继承了width和height
+这两个方法。例如，假定有一个ArrayElement ae，可以用ae.width来查询其宽度，就像width是定义在ArrayElement类一样。    
+　　*子类型*的意思是子类的值可以被用在任何需要超类的值的场合。例如：    
+```scala
+val e: Element = new ArrayElement(Array("hello"))
+```    
+　　变量e的类型是Element，因此用于初始化的值也应该是一个Element。事实上，初始值的类型是ArrayElement。这是可以的，因为ArrayElement类扩
+展自Element，这样，ArrayElement类型是与Element类型兼容的。    
+　　ArrayElement和Array[String]之间存在着*组合（composition）* 关系。这个关系被称作组合，是因为ArrayElement是通过使用Array[String]
+组合出来的，Scala编译器会在为ArrayElement生成二进制类文件中放入一个指向传入的conts数组的的字段。    
+
+***    
+
