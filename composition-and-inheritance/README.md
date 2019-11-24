@@ -118,4 +118,11 @@ val e: Element = new ArrayElement(Array("hello"))
 组合出来的，Scala编译器会在为ArrayElement生成二进制类文件中放入一个指向传入的conts数组的的字段。    
 
 ***    
+## Overriding-Methods-And-Fields   
+　　统一访问原则只是Scala比Java在处理字段和方法上更加统一的一个方面。另一个区别是Scala中字段和方法属于同一个命名空间。这使得用字段重写无参
+方法变为可能。但是，Scala禁止在同一个类中使用相同名称命名的字段和方法（Java可以）。    
+　　一般来说，Scala只有两个命名空间用于定义，不同于Java的四个。Java的四个命名空间分别是：字段、方法、类型和包，而Scala的两个命名空间分别
+是：*值（字段、方法、包和单例对象）、类型（类和特质名）*。Scala将字段和方法放在同一个命名空间的原因是为了让你可以用val来重写一个无参方法。    
+
+***    
 
