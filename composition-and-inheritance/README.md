@@ -125,4 +125,41 @@ val e: Element = new ArrayElement(Array("hello"))
 是：*值（字段、方法、包和单例对象）、类型（类和特质名）*。Scala将字段和方法放在同一个命名空间的原因是为了让你可以用val来重写一个无参方法。    
 
 ***    
+## Defining-Parametric-Fields    
+　　现在ArrayElement类有一个conts参数，这个参数存在的唯一目的就是被拷贝到contents字段上。参数的名称选用conts也是为了让它看上去跟字段名
+contents相似但又不至于跟它冲突。这个是“代码的坏味道（code smell）”，是代码可能存在不必要的冗余和重复的一种信号。    
+　　可以通过将参数和字段合并成*参数化字段（parametric field）* 定义的方式来避免这个问题：    
+```scala
+class ArrayElement(
+  val contents: Array[String]
+) extends Element
+```    
+　　注意，现在contents是val的。这是同时定义参数和同名字段的简写方式。具体来说，ArrayElement类现在具备一个（不能被重新赋值的）contents字
+段，该字段可以被外界访问到。该字段被初始化为参数的值。就好像类定义是如下样子，其中x123是这个参数的任意起的新名：    
+```scala
+class ArrayElement(x123: Array[String]) extends Element {
+  val contents: Array[String] = x123
+}
+```    
+　　也可以在类参数的前面加上var，这样的话对应的字段就可以被重新赋值。最后，还可以给这些参数化字段添加修饰符，比如private、protected或者
+overried，就像鞥能够对其他类成员做的那样。例如下面这些类的定义：    
+```scala
+class Cat {
+  val dangerous = false
+}
+class Tiger(
+  override val dangerous: Boolean,
+  private var age: Int
+) extends Cat
+```    
+　　Tiger的定义是如下这个包含重写成员dangerous和私有成员age的类定义的简写方式：    
+```scala
+class Tiger(param1: Boolean, param2: Int) extends Cat {
+  override val dangerous = param1
+  private var age = param2
+}
+```    
+　　这两个成员都通过对应的参数初始化。选择param1和param2这两个名字是非常随意的，重要的是它们并不跟当前作用域的其他名称相冲突。    
+
+***    
 
