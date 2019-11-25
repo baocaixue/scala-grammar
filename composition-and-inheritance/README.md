@@ -162,4 +162,18 @@ class Tiger(param1: Boolean, param2: Int) extends Cat {
 　　这两个成员都通过对应的参数初始化。选择param1和param2这两个名字是非常随意的，重要的是它们并不跟当前作用域的其他名称相冲突。    
 
 ***    
+## Invoking-Superclass-Constructors    
+　　目前为止已经拥有一个由两个类组成的完整系统：一个抽象类Element，这个类又被另一个具体类ArrayElement扩展。当然可以有其他方式来表达一个元
+素。比如，使用方可能要创建一个由字符串给出的单行组成的布局元素。面向对象的编程让我们很容易用新的数据变种来扩展一个已有的系统，只需要添加子类
+即可。举例来说，示例给出了一个扩展自ArrayElement的LineElement类：    
+```scala
+class LineElement(s: String) extends ArrayElement(Array(s)) {
+  override def width: Int = s.length
+  override def height: Int = 1 
+}
+```    
+　　由于LineElement扩展自ArrayElement，而ArrayElement的构造方法接收一个参数（Array[String]），LineElement需要向其超类的主构造方法
+传入这样一个入参。要调用超类的构造方法，只需要将打算传入的入参放在超类名称后的圆括号里即可。    
+
+***    
 
