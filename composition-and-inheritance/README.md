@@ -225,4 +225,21 @@ class ArrayElement extends Element {
 　　如果想确保某个类没有子类，可以将类声明为final。    
 
 ***    
+## Using-Composition-And-Inheritance    
+　　组合和继承是两种用其他已有的类来定义新类的方式。如果主要追求的是代码复用，一般来说应当优先使用组合而不是继承。只有继承才会受到脆弱基类问
+题的困扰，会在修改超类时不小心破坏了子类的代码。    
+　　关于继承关系，在建模的时候这个关系是否满足*is-a（是一个）* 的关系。例如，ArrayElement是一个Element。另一个判定的方法是，这些类的使用
+方是否会把子类的类型当作超类的类型来使用。以ArrayElement为例，确实是预期使用方会将ArrayElement作为Element来用。    
+　　考虑LineElement，是否理所应当是一个ArrayElement？是否认为使用方会需要吧LineElement当作ArrayElement来用？其实，将LineElement定义
+为ArrayElement的主要目的是复用ArrayElement的contents定义。因此，也许更好的做法是将LineElement定义为Element的直接子类：    
+```scala
+class LineElement(s: String) extends Element {
+  val contents = Array(s)
+  override def width = s.length
+  override def height = 1
+}
+```    
+　　在前一个版本中，LineElement有一个跟ArrayElement的继承关系，它继承了contents。现在LineElement有一个跟Array的组合关系：它包含了一个
+从自己的contents字段指向一个字符串数组的引用。    
 
+***    
