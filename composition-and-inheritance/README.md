@@ -213,4 +213,16 @@ val e: Element = new UniformElement('x',2,3)
 变量或表达式的类型来决定的。    
 
 ***    
+## Declaring-Final-Members    
+　　有时，在设计类继承关系的过程中，想确保某个成员不能被子类继承。在Scala中，跟Java一样，可以通过在成员前面加上final修饰符来实现：    
+```scala
+class ArrayElement extends Element {
+  final override def demo() = {
+    println("")
+  }
+}
+```    
+　　如果想确保某个类没有子类，可以将类声明为final。    
+
+***    
 
