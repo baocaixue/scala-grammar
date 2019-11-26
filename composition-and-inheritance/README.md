@@ -193,4 +193,24 @@ def hidden(): Boolean
 符。
 
 ***    
+## Polymorphism-And-Dynamic-Binding    
+　　已知：类型为Element的变量可以指向一个类型为ArrayElement的对象。这个现象的名称叫作*多态（polymorphism）*，意思是“多个形状”或“多种形
+式”。在我们的这个例子中，Element对象可以有许多不同的展现形式（这一类多态被称为子类型多态，Scala还有一种多态，全类型多态或叫做参数多态）。     
+　　目前为止，Element有两种形式：ArrayElement和LineElement。可以通过定义新的Element子类来创建更多形式的Element。例如，可以定义一个新
+形式的Element，有一个指定宽度和高度，并用制定的字符填充：    
+```scala
+class UniformElement(
+  ch: Char,
+  override width: Int,
+  override height: Int
+) extends Element {
+  private val line = ch.toString * width
+  override def contents = Array.fill(height)(line)
+}
+val e: Element = new UniformElement('x',2,3)
+```    
+　　需要注意，对变量和表达式的方法调用是*动态绑定（dynamic bound）* 的。就是说实际被调用的方法实现是在运行时基于对象的类来决定的，而不是
+变量或表达式的类型来决定的。    
+
+***    
 
