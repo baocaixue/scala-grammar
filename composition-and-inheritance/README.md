@@ -292,4 +292,52 @@ line1和line2拼接起来的结果。因此这段代码的最终结果和第一�
 议，因为toString是一个不接收任何参数的纯方法。    
 
 ***    
+## Defining-A-Factory-Object    
+　　现在已经拥有一组用于布局元素的类。这些类的集成关系可以“原样”展现给使用方，不过也能把继承关系隐藏在一个工厂对象背后是一个不过的选择。工厂
+对象包含创建其他对象的方法。使用方用这些工厂对象方法来构造对象，而不是直接用new构建对象。这种做法的好处是对象创建的逻辑可以被集中起来，而对
+象是如何用具体的类表示的细节可以被隐藏起来。这样既可以让类库更容易被使用方理解，因为暴露的细节更少，同时还提供了更多的机会在未来在不破坏使用
+方代码的前提下改变类库的实现。    
+　　为布局元素构建工厂的第一个任务是选择在哪里放置工厂方法。工厂方法应该作为某个单例对象的成员，还是类的成员？包含工厂方法的对象或类应该如何
+命名？可能性有很多。直接的方案是创建一个Element类的*伴生对象*，作为布局元素的工厂对象。这样，只需要暴露Element这组类/对象给使用方，并将ArrayElement、
+LineElement、UniformElement这三个实现类隐藏起来：    
+```scala
+import Element.elem
+
+abstract class Element {
+  def contents: Array[String]
+  def height: Int = contents.length
+  def width: Int = if (height == 0) 0 else contents(0).length
+
+  def above(that: Element): Element = elem(this.contents ++ that.contents)
+
+  def beside(that: Element): Element = elem(
+    for ((line1, line2) <- this.contents zip that.contents) yield line1 + line2
+  )
+
+  override def toString: String = contents mkString "\n"
+}
+object Element {
+  private class ArrayElement(override val contents: Array[String]) extends Element
+
+
+  private class LineElement(s: String) extends Element {
+    override def width: Int = s.length
+    override def height: Int = 1
+    val contents: Array[String] = Array(s)
+  }
+  
+  private class UniformElement(ch: Char, override val width: Int, override val height: Int) extends Element {
+    private val line = ch.toString * width
+    def contents: Array[String] = Array.fill(height)(line)
+  }
+  
+  def elem(contents: Array[String]): Element = new ArrayElement(contents)
+  
+  def elem(chr: Char, width: Int, height: Int): Element = new UniformElement(chr, width, height)
+  
+  def elem(line: String): Element = new LineElement(line)
+}
+```    
+
+***    
 
