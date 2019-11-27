@@ -243,3 +243,53 @@ class LineElement(s: String) extends Element {
 从自己的contents字段指向一个字符串数组的引用。    
 
 ***    
+## Implementing-Above-Beside-And-Tostring    
+　　接下来，将实现Element类的above方法。将某个元素放在另一个“上面”意味着将两个元素的值拼接在一起。第一版的above方法可能是这样的：    
+```scala
+def above(that: Element): Element = new ArrayElement(this.contents ++ that.contents)
+```    
+　　其中`++`这个操作将两个数组拼接在一起。Scala中的数组是用Java的数组表示的，不过支持更多的方法。具体来说，Scala的数组可以被转换成scala.Seq
+类的示例这个类代表了类似于序列的结构，包含了访问和转换序列的若干方法。事实上，前面给出的代码并不是很够用，因为它不允许将宽度不同的元素叠在一
+起。不过为了让事情保持简单，这个问题暂不处理，只是每次都记得传入相同长度的元素给above。    
+　　下一个要实现的方法是beside。要把两个元素并排放在一起，将创建一个新的元素。在这个新的元素中，每一行都是由两个元素对应行拼接在一起。跟之前
+一样，为了保持简单，先假定两个元素有相同的高度：    
+```scala
+def beside(that: Element): Element = {
+  val contents = new Array[String](this.contents.length)
+  for (i <- 0 until this.contents.length)
+    contents(i) = this.contents(i) + that.contents(i)
+  new ArrayElement(contents)
+}
+```    
+　　这个beside方法首先分配一个新的数组contents，用this.contents和that.contents对应的数组元素拼接的字符串填充。最后，产生一个新的包含新
+的contents的ArrayElement。虽然这个beside的实现可以解决问题，但是它是用指令式风格写的，明显的标志是用下标遍历数组时使用的循环。换另一种方
+式可以将这个方法简化为一个表达式：    
+```scala
+new ArrayElement(
+  for (
+    (line1, line2) <- this.contents zip that.contents
+  ) yield line1 + line2
+)
+```    
+　　在这里，用zip操作符将this.contents和that.contents这两个数组转换为对偶（即Tuple2）数组。这个zip操作符从它的两个操作元中选取对应的元
+素，组装成一个对偶（pair）的数组。例如，如下表达式：    
+```scala
+Array(1,2,3) zip Array("a","b")
+```    
+　　将被求值为：    
+```scala
+Array((1,"a"),(2,"b"))
+```    
+　　如果其中一个操作元数组比另一个长，zip将会扔掉多余的元素。在上面的表达式中，左操作元的第三个元素并没有进入结果，因为它在右操作元中没有对
+应的元素。    
+　　接下来，这个zip起来的数组被一个for表达式遍历。这里，`for((line1,line2) <- ...)`这样的语法允许在一个*模式（pattern）* 中同时对两个
+元素命名（也就是说line1表示对偶的第一个元素，而line2表示对偶的第二个元素）。可以先认为这是在迭代中的每一步定义两个val（line1和line2）的
+一种方式。    
+　　for表达式有一个部分叫作yield，通过yield交出结果。这个结果的类型和被遍历的表达式是同一种（也就是数组）。数组中的每个元素都是将对应的行
+line1和line2拼接起来的结果。因此这段代码的最终结果和第一版的beside是一样的，不过由于它避免了显式的数组下标，获取结果的过程更少出错。    
+　　还需要某种方式来显示元素。跟往常一样，这是通过定义返回格式化好的字符串的toString方法完成的：`override def toString = contents mkString 
+"\n"`。toString的实现用到了mkString，这个方法对所有序列都适用，包括数组。注意，toString并没有带上一个空参数列表。这符合统一访问原则的建
+议，因为toString是一个不接收任何参数的纯方法。    
+
+***    
+
