@@ -12,8 +12,6 @@
 - 使用组合和继承...................................................[11](#Using-Composition-And-Inheritance)
 - 实现above、beside和toString...................................................[12](#Implementing-Above-Beside-And-Tostring)
 - 定义工厂对象...................................................[13](#Defining-A-Factory-Object)
-- 增高和增宽...................................................[14](#Heighten-And-Widen)
-- 放在一起...................................................[15](#Putting-It-All-Together)    
 
 ***    
 ## A-TwoDimensional-Layout-Library    
