@@ -9,3 +9,6 @@
 每一个其他类的超类那样，Nothing是每一个其他类的子类。
 
 ***    
+## Scala's-Class-Hierarchy
+　　
+![image](https://github.com/baocaixue/scala-grammar/tree/master/scala-hierarchy/src/main/resources/ScalasHierarchy.png)
