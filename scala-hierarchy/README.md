@@ -11,4 +11,4 @@
 ***    
 ## Scala's-Class-Hierarchy
 　　
-![image](https://github.com/baocaixue/scala-grammar/tree/master/scala-hierarchy/src/main/resources/ScalasHierarchy.png)
+![image](https://raw.githubusercontent.com/baocaixue/scala-grammar/master/scala-hierarchy/src/main/resources/ScalasHierarchy.png)
