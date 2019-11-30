@@ -20,6 +20,7 @@
         <module>functions-and-closures</module>
         <module>control-abstraction</module>
         <module>composition-and-inheritance</module>
+        <module>scala-hierarchy</module>
     </modules>
 
     <properties>
