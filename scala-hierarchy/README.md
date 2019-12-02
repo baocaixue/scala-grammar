@@ -61,3 +61,47 @@ res8: Int = 3
 中任意换用Object和AnyRef，推荐的风格是尽量都使用AnyRef。    
 
 ***    
+## Primitives-Implemented    
+　　事实上，Scala存放整数的方式跟Java一样，都是32位的词（word）。这对于JVM上的效率以及跟Java类库的互操作都很重要。标准操作比如加法和乘法
+被实现为基本操作。不过，Scala在任何需要将整数当作（Java）对象时，都会启用“备选”的java.lang.Integer类。例如，对整数调用toString或将整数
+赋值给一个类型为Any的变量时，都会发生这种情况。类型为Int的整数在必要时都会透明地被转换成类型为java.lang.Integer的“装箱整数”。    
+　　所有这些听上去都很像Java 5的自动装箱（auto-boxing）机制，也的确非常相似。不过有一个很重要的区别：Scala中的装箱跟Java相比要透明得多。
+参考下面的Java代码：    
+```java
+boolean isEqual(int x, int y) {
+    return x == y;
+}
+System.out.println(isEquals(421, 421))
+```    
+　　这里会得到true。现在，将isEqual的参数类型改为java.lang.Integer（或者Object也可以）：    
+```java
+boolean isEqual(Integer x, Integer y) {
+    return x == y;
+}
+System.out.println(isEqual(421, 421))
+```    
+　　会发现得到的是false！这里的数字421被装箱了两次，因此x和y这两个参数实际上是两个不同的对象。由于==对于引用类型而言意味着引用相等性。而
+Integer是一个引用类型，结果就是false。这一点也显示出Java并不是一个纯面向对象的语言。基本类型和引用类型之间有一个清晰可被观察到的区别。    
+　　现在，用Scala来做相同的实验：    
+```scala
+def isEqual1(x: Int, y: Int) = x == y
+def isEqual2(x: Any, y: Any) = x == y
+isEqual1(421, 421)//true
+isEqual2(421, 421)//true
+```    
+　　Scala的相等性操作==被设计为对于类型的实际呈现是透明的。对于值类型而言，它表示的是自然（数值或布尔值）相等性。而对于Java装箱数值类型之外
+的引用类型，==被处理成Object继承的equals方法的别名。这个方法原本定义用于引用相等性，但很多子类都重写了这个方法来实现它们对于相等性更自然的
+理解和表示。这也意味着在Scala中不会陷入Java那个跟字符串对比相关的陷阱。Scala的字符串对比是它应该有的样子：    
+```scala
+val x = "abcd".substring(2)//"cd"
+val y = "abcd".substring(2)//"cd"
+x == y//true
+```    
+　　在Java中，对x和y的对比结果会返回false。这里因该用equals，但是Scala就不必如此。    
+　　不过，在有些场景下需要引用相等性而不是用户定义的相等性。例如，有些场景对于效率的要求超高，可能会对某些类使用hash cons并引用相等性来对比
+其实例（hash cons的意思是将创建的实例缓存在一个弱引用的集合中。然后，当想获取该类的新实例时，首先检查这个缓存，如果缓存已经有一个元素跟要创
+建的相等，就可以复用这个已存在的实例。这样以来，任何两个以equals()相等的实例从引用相等性的角度也是相等的）。对于这些情况，AnyRef定义了一个
+额外的**eq方法**，该方法不能被重写，实现为引用相等性（行为跟Java中==对于引用类型的行为是一致的）。还有一个eq的反义方法*ne*。    
+
+***   
+
