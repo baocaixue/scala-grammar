@@ -104,4 +104,23 @@ x == y//true
 额外的**eq方法**，该方法不能被重写，实现为引用相等性（行为跟Java中==对于引用类型的行为是一致的）。还有一个eq的反义方法*ne*。    
 
 ***   
-
+## Bottom-Types    
+　　在上面的类继承关系图的底部，有两个类：scala.Null和scala.Nothing。它们是Scala面向对象的类型系统统一处理某些“极端情况（corner case）”
+的特殊类型。    
+　　Null类是null引用的类型，它是每个引用类（继承自AnyRef的类）的子类。Null并不兼容于值类型，比如不能将null赋值给一个整数变量。    
+　　Nothing位于Scala类继承关系的底部，它是每个其他类型的子类型。不过，并不存在这个类型的任何值。为什么要这么一个没有值的类型呢？Nothing
+的用途之一是给出非正常终止的信号。    
+　　举例来说，Scala标准类库Predef对象有一个error方法，其定义如下：    
+```scala
+def error(message: String): Nothing = throw new RuntimeException(message)
+```    
+　　error的返回类型是Nothing，这告诉使用方该方法并不会正常返回（它会抛出异常）。由于Nothing是每个其他类型的子类型，可以以非常灵活的方式来
+使用error这样的方法。例如：    
+```scala
+def divide(x: Int, y: Int): Int = 
+    if (y != 0) x / y
+    else error("can't divide by zero")
+```    
+　　这里`x / y`条件判断的“then”分支的类型为Int，而else分支类型为Nothing。由于Nothing是Int的子类型，整个条件判断表达式的类型就是Int，正
+如方法声明要求的那样。    
+　　
