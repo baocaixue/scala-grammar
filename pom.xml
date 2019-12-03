@@ -21,6 +21,7 @@
         <module>control-abstraction</module>
         <module>composition-and-inheritance</module>
         <module>scala-hierarchy</module>
+        <module>traits</module>
     </modules>
 
     <properties>
