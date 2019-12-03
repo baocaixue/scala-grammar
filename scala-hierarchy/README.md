@@ -19,7 +19,7 @@ def ##: Int
 def hashCode: Int
 def toString: Int
 ```    
-![image](https://raw.githubusercontent.com/baocaixue/scala-grammar/master/scala-hierarchy/src/main/resources/ScalasHierarchy.png)    
+![image](https://github.com/baocaixue/scala-grammar/blob/master/scala-hierarchy/src/main/scala/com/isaac/ch11/ScalasHierarchy.png?raw=true)    
 　　由于每个类都继承自Any，Scala程序中的每个对象都可以用`==`、`!=`、或`equals`来进行比较，用`##`或`hashCode`做哈希，以及用`toString`
 做格式化。相等和不等方法（`==`和`!=`）在Any类中声明为final，所以它们不能被子类重写。    
 　　`==`方法从本质上讲等同于`equals`，而`!=`一定是`equals`的反义（唯一一个`==`不直接调用`equals`的场景是Java的数值类，比如Integer或
