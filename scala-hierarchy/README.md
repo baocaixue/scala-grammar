@@ -2,7 +2,7 @@
 - Scala的类继承关系...................................................[1](#Scala's-Class-Hierarchy)
 - 基本类型的实现机制...................................................[2](#Primitives-Implemented)
 - 底类型（bottom types）...................................................[3](#Bottom-Types)
-- 定义自己的值类型 ...................................................[4](#Defining-You-Own-Value-Classes)    
+- 定义自己的值类型 ...................................................[4](#defining-you-own-value-classes)    
     
 　　在Scala中，每个类都继承自同一个名为*Any*的超类。由于每个类都是Any的子类，在Any中定义的方法是“全类型的”（universal）：它可以在
 任何对象上被调用。Scala还在继承关系的底部定义了一些有趣的类，*Null*和*Nothing*，它们本质上是作为通用的子类存在的。例如，就像Any是
@@ -124,3 +124,63 @@ def divide(x: Int, y: Int): Int =
 　　这里`x / y`条件判断的“then”分支的类型为Int，而else分支类型为Nothing。由于Nothing是Int的子类型，整个条件判断表达式的类型就是Int，正
 如方法声明要求的那样。    
 　　
+***    
+## defining-you-own-value-classes    
+　　现在可以定义自己的值类来对内建的值类进行扩充。跟内建的值类一样，自定义的值类的实例通常也会编译成那种不使用包装类的Java字节码。在需要包装
+类的上下文里，比如泛型代码，值将被自动装箱和拆箱。    
+　　只有特定的几个类可以成为值类。要使得某个类成为值类，它必须有且仅有一个参数，并且内部除了def之外不能有任何其他东西。不仅如此，也不能有其
+他类扩展自值类，且值类不能重新定义equals和hashCode。    
+　　要定义值类，需要将它处理成AnyVal的子类，并在它唯一的参数前加上val。以下是值类的一个例子：    
+```scala
+class Dollars(val amount: Int) extends AnyVal {
+  override def toString: String = "$" + amount 
+}
+```    
+　　参数前的val让amount参数可以作为字段被外界访问。例如，如下代码将创建这个值类的一个实例，然后从中获取金额：    
+```scala
+val money = new Dollars(100000)//Dollars = $100000
+money.amount//int = 100000
+```    
+　　本例中，money指向该值类的一个实例。它在Scala的源码中的类型为Dollars，但在便以后的Java字节码中将直接使用Int。    
+　　这个例子定义了toString方法，编译器将识别出什么时候使用这个方法。这就是为什么打印money将给出$100000，带上了美元符，而打印money.amount
+仅会给出100000。甚至可以定义多个同样以Int值支撑的值类型。例如：    
+```scala
+class SwissFrances(val amount: Int) extends AnyVal {
+  override def toString: String = amount + "CHF" 
+}
+```    
+　　尽管Dollars和SwissFrancs最终都是以整数呈现的，在相同的作用域内同时使用它们并没有什么问题。    
+
+### 避免类型单一化    
+　　要想尽可能发挥Scala类继承关系的好处，请试着对每个领域概念定义一个新的类，哪怕服用相同的类作不同的用途也是可行的。即便这样的一个类是所谓
+的*细微类型（tiny type）* ，即没有方法也没有字段，定义这样的一个额外的类有助于编译器在更多的地方帮助到你。    
+　　例如，假定编写代码生成HTML。在HTML中，风格名是用字符串表示的。锚定标识符也是如此。HTML自身也是字符串，所以可以用字符串定义的助手方法来
+表示所有的这些内容：    
+```scala
+def title(text: String, anchor: String, style: String): String = 
+    s"<a id='$anchor'<h1 class='$style'>$text</h1></a>"
+```    
+　　这个类型签名出现了四个字符串！这类*字符串类型（stringly typed）* 的代码从技术上讲是强类型的，但由于能看到的都是字符串类型的，编译器
+并不能帮助检测用错参数的情况。例如：    
+```scala
+title("chap:vcls", "bold", "Value Classes")//String = <a id='bold'><h1 class='Value Classes'>cha.vcls</h1></a>
+```    
+　　这段HTML代码完全坏掉了。本意是用来显示的文本“Value Classes”被用成了风格类，而显示出来的文本是“chap.vcls”，这本应该是锚定点的。最后
+实际的锚定标识为“bold”，这其实本应是风格类的。这些错误，编译器都不会提示出来。    
+　　如果对每个领域概念都定义一个细微类型，编译器就能对我们更有帮助。比如，可以分别对风格、锚定标识、显示文本和HTML都定义一个小类。由于这些
+类只有一个参数，没有其他成员，它们可以被定义成值类：    
+```scala
+class Anchor(val value: String) extends AnyRef
+class Style(val value: String) extends AnyRef
+class Text(val value: String) extends AnyRef
+class Html(val value: String) extends AnyRef
+
+def title(text: Text, anchor: Anchor, style: Style): Html = 
+    new Html(
+      s"<a id='${anchor.value}'>" + 
+          s"<h1 class='${style.value}'>" +
+          text.value +
+          "</h1></a>"
+    )
+```    
+
