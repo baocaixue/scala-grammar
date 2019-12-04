@@ -87,4 +87,28 @@ class Frog extends Animal with Philosophical {
 看上去有些奇特的行为是特质能实现*可叠加修改（stackable modification）* 的关键。    
 
 ***    
+## Thin-Versus-Rich-Interfaces    
+　　特质的一个主要用途是自动给类添加基于已有方法的新方法。也就是说，特质可以丰富一个*瘦*接口，让它成为*富*接口。瘦接口和富接口代表了我们在
+面向对象设计中经常面临的取舍，在接口实现者和使用者之间的权衡。富接口有很多方法，对于调用方而言十分方便。使用者可以选择完全匹配他们需求的功能
+的方法。而瘦接口的方法较少，因而实现起来更容易。不过瘦接口的使用方需要编写更多的代码。由于可供选择的方法较少，他们可能被迫选择一个不那么匹配
+需求的方法，然后编写额外的代码来使用它。    
+　　Java接口通常比较瘦。例如，Java 1.4引入的CharSequence接口就是一个对所有包含一系列字符的类似字符串的类的通用瘦接口。如下是以Scala的视
+角看到的定义：    
+```scala
+trait CharSequence {
+  def charAt(index: Int): Char
+  def length: Int
+  def subSequence(start: Int, end: Int): CharSequence
+  def toString: String
+}
+```    
+　　虽然String类的大部分方法都适用于CharSequence，Java的CharSequence接口仅声明了四个方法。而如果CharSequence接口包括了完整的String
+接口方法，又势必会给CharSequence的实现者带来巨大的负担。每个用Java实现CharSequence的程序员又要多实现数十个方法。由于Scala的特质能包含具
+体方法，这让编写富接口变得方便得多。    
+　　给特质添加具体方法让瘦接口和富接口之间的取舍变得严重倾向于富接口。不同于Java，给Scala特质添加具体的方法是一次性的投入。只需要在特质中实
+现这些方法一次，而不需要在每个混入该特质的类中重新实现一遍。因此，跟其他没有特质的语言相比，Scala中实现富接口的代价更小。    
+　　要用特质来丰富某个接口，只需要定义一个拥有为数不多的抽象方法（接口中瘦的部分）和可能数量很多的具体方法（这些具体方法基于那些抽象方法编写）
+的特质。然后，就可以将这个增值特质混入到某个类，在类中实现接口中瘦的部分，最终得到一个拥有完整富接口实现的类。    
+
+***    
 
