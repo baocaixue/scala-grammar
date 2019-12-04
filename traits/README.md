@@ -111,4 +111,43 @@ trait CharSequence {
 的特质。然后，就可以将这个增值特质混入到某个类，在类中实现接口中瘦的部分，最终得到一个拥有完整富接口实现的类。    
 
 ***    
+## Rectangular-Objects    
+　　图形类库通常有许多不同的类来表示矩形。例如窗体、位图图片，以及用鼠标圈定的区域等。为了让这些矩形对象更加易于使用，我们的类库最好能提供一
+些坐标相关的查询，比如width、height、left、right、toLeft等。不过，存在很多这样的方法是有很多好处，但对于类库编写者而言，在Java类库中为
+所有矩形对象提供全部方法是个巨大的负担。作为对比，如果这样的类库是Scala编写的，类库作者就可以用特质来轻松地对所有想要这些功能的类加上这些
+便利方法。    
+　　首先，可以设想一下不用特质的情况，代码会什么样子。应该会有某种基本的几何类，比如Point和Rectangle：    
+```scala
+class Point(val x: Int, val y: Int)
+
+class Rectangle(val topLeft: Point, val bottomRight: Point) {
+  def left = topLeft.x
+  def right = bottomRight.x
+  def width = right - left
+  //以及更多几何方法...
+}
+```    
+　　图形库可能还会有另一个类是2D图形组件：    
+```scala
+abstract class Component {
+  def topLeft: Point
+  def bottomRight: Point 
+  def left = topLeft.x
+  def right = bottomRight.x
+  def width = right - left
+}
+```    
+　　注意两个类的left、right和width的定义完全一致。对于任何其他表示矩形对象的类，处理细微差异外，这些方法也会是相同的。这些重复的代码可以用
+特质来消除。这个特质会包含两个抽象方法：一个返回对象左上角的坐标，另一个返回右下角的坐标。然后它可以提供所有其他集合查询相关方法的具体实现。    
+```scala
+trait Rectangular {
+  def topLeft: Point 
+  def bottomRight: Point 
+  def left = topLeft.x
+  def right = bottomRight.x
+  def width = right - left
+} 
+```     
+
+***    
 
