@@ -150,4 +150,36 @@ trait Rectangular {
 ```     
 
 ***    
+## Order-Trait    
+　　比较（对象大小）是另一个富接口带来便捷的领域。当需要比较两个对象来对它们排序时，如果有这么一个方法可以调用来明确你要的比较，就会很方便。
+如果你要的是“小于”，可以说<，而“小于等于”可以说<=。如果用一个瘦的比较接口，可能只能用<方法，而有时可能需要编写类似`(x < y) || (x == y)`
+这样的代码。而一个富接口可以提供所有常用的比较操作，这样就可以直接写下如同`x <= y`这样的代码。    
+　　在看Order具体实现之前，我们完成比较操作可能作出类似这样的代码（使用Rational类）：    
+```scala
+class Rational(n: Int, d: Int) {
+  //...
+  def <(that: Rational) = this.numer * that.denom < that.numer * this.denom
+  def >(that:Rational) = that < this
+  def <=(that: Rational) = (this < that) || (this == that)
+  def >=(that: Rational) = (this > that) || (this == that)
+}
+```    
+　　这个类定义了四个比较操作符，这是个经典的展示出定义富接口代价的例子。首先，注意其中的三个比较操作符都是基于地一个来定义的，注意所有的
+这三个方法对于任何其他可以被比较的类来说都是一样的。对于有理数而言，在`<=`的语义方面，没有任何的不同。在比较的上下文中，<=总是被用来表示
+“小于或等于”。总体来说，这个类里有相当多的样板代码，在其他实现了比较操作的类中不会与此有什么不同。    
+　　这个问题如此普遍，Scala提供了专门的特质来解决。这个特质叫做**Ordered**。使用的方式是将所有单独的比较方法替换成*compare*方法。Ordered
+特质定义了<、>、<=和>=，这些方法都是基于提供的compare来实现的。因此，Ordered允许只实现一个compare方法来增强某个类，让它拥有完整的比较操作。    
+　　以下是用Ordered特质来对Rational定义比较操作的代码：    
+```scala
+class Rational(n: Int, d: Int) extends Ordered[Rational] {
+  override def compare(that:  Rational): Int =  (this.numer * that.denom) - (that.numer * this.denom)
+}
+```    
+　　你只需要做两件事。首先，这个版本的Rational混入了Ordered特质。与之前的其他特质不同，Ordered要求在混入时传入一个*类型参数*;需要做的第
+二件事是定义一个用来比较两个对象的compare方法，该方法应该比较接收者，即this，和作为参数传入该方法的对象。如果两个对象相同，它应该返回0，如
+果接收者比入参小，应该返回负值，如果接收者比入参大，则返回正值。    
+　　要小心Ordered特质并不会帮你定义equals方法，因为它做不到。这当中的问题在于用compare来实现equals需要检查传入对象的类型，而由于（Java的）
+类型擦除机制，Ordered特质自己无法完成这个检查。因此需要定义equals方法。    
+
+***    
 
