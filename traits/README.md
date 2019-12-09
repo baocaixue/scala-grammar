@@ -1,11 +1,11 @@
 # 特质
 - 特质如何工作...................................................[1](#How-Traits-Work)
-- 瘦接口和富接口...................................................[1](#Thin-Versus-Rich-Interfaces)
-- 示例：矩形对象...................................................[1](#Rectangular-Objects)
-- Ordered特质...................................................[1](#Order-Trait)
-- 作为可叠加修改的特质...................................................[1](#Traits-As-Stackable-Modifications)
-- 为什么不用多重继承...................................................[1](#Why-Not-Multiple-Inheritance)
-- 要特质还是不要特质...................................................[1](#To-Trait-Or-Not-To-Trait)    
+- 瘦接口和富接口...................................................[2](#Thin-Versus-Rich-Interfaces)
+- 示例：矩形对象...................................................[3](#Rectangular-Objects)
+- Ordered特质...................................................[4](#Order-Trait)
+- 作为可叠加修改的特质...................................................[5](#Traits-As-Stackable-Modifications)
+- 为什么不用多重继承...................................................[6](#Why-Not-Multiple-Inheritance)
+- 要特质还是不要特质...................................................[7](#To-Trait-Or-Not-To-Trait)    
     
 　　特质是Scala代码复用的基础单元。特质将方法和字段定义封装起来，然后通过将它们混入（mix in）类的方式来实现复用。它不同于类继承，类继承要求
 每个类都继承自一个（明确）的超类，而类可以同时混入任意数量的特质。这里将展示特质的工作原理并给出两种最常见的适用场景：将“瘦”接口拓宽为“富”接
@@ -182,4 +182,77 @@ class Rational(n: Int, d: Int) extends Ordered[Rational] {
 类型擦除机制，Ordered特质自己无法完成这个检查。因此需要定义equals方法。    
 
 ***    
+## Traits-As-Stackable-Modifications    
+　　前面介绍的是特质的一个主要用途：*将瘦接口转化成富接口*。现在我们将转向另一个主要用途：*为类提供可叠加的修改*。特质让你修改类的方法，而它
+们的实现方式允许你将这些修改叠加起来。    
+　　考虑这样一个例子，对于某个整数队列叠加修改。这个队列有两个操作：put，将整数放入队列;get，将它们取出来。队列是先进先出的，所以get应该按
+照整数被放入队列的顺序返回这些整数。    
+　　给定一个实现了这样一个队列的类，可以定义特质来执行如下这些修改：    
+* Doubling：将所有放入队列的整数翻倍
+* Incrementing：将所有放入队列的整数加一
+* Filtering：从队列中去除负数    
+　　这三个特质代表了*修改（modification）*，因为他们修改底下的队列类，而不是自己定义完整的队列类。这三个特质也是*可叠加的（stackable）*。
+可以从这三个特质中任意选择，将它们混入类，并得到一个带上你选择的修改的新的类。    
+　　示例中给出了一个抽象的IntQueue类。而BasicIntQueue使用ArrayBuffer对IntQueue实现：    
+```scala
+abstract class IntQueue {
+  def get(): Int
+ 
+  def put(x: Int)
+}
 
+import scala.collection.mutable.ArrayBuffer
+class BasicIntQueue extends IntQueue {
+  private val buf = new ArrayBuffer[Int]
+  
+  def get() = buf.remove(0)
+
+  def put(x: Int) = buf += x
+}
+```    
+　　现在来看看如何用特质修改上述的行为。下面示例给除了在放入队列时对整数翻倍的特质。Doubling特质有两个好玩的地方。首先它声明了一个超类IntQueue。
+这个声明意味着这个特质只能被混入同样继承自IntQueue的类。因此，可以将Doubling混入BasicIntQueue。    
+```scala
+trait Doubling extends IntQueue {
+  abstract override def put(x: Int) = super.put(2 * x)
+}
+```    
+　　第二个好玩的地方是该特质有在一个声明为抽象的方法里做了super调用。对于普通的类而言这样的调用是非法的，因为在运行时必定会失败。不过对于特
+质而言，这样的调用实际上可以成功。由于特质中的super调用是动态绑定的，只要在给出了方法具体定义的特质或类之后混入，Doubling特质里的super调用
+就可以正常工作。    
+　　对于实现可叠加修改的特质，这样的安排通常是需要的。为了告诉编译器你是特意这样做的，必须将这样的方法标记为*abstract override*。这样的修
+饰符组合只允许用在特质的成员上，不允许用在类的成员上，它的含义是该特质必须混入某个拥有该方法具体定义的类中。    
+　　对于这样一个简单的特质而言，是不是有很多事情发生（在幕后）？这个特质用起来是这样的 ：    
+```shell script
+scala> class MyQueue extends BasicIntQueue with Doubling
+defined class MyQueue
+scala> val queue = new MyQueue
+queue: MyQueue = MyQueue@44bbf788
+scala> queue.put(10)
+scala> queue.get()
+res12: Int = 20
+```    
+　　注意，MyQueue并没有定义新的代码，只是简单地给出一个类然后混入一个特质。在这种情况下，可以在用new实例化的时候直接给出“BasicIntQueue 
+with Doubling”，而不是定义一个有名字的类：    
+```scala
+val queue = new BasicIntQueue with Doubling
+```    
+　　下面给出另外两个修改特质，Incrementing和Filtering：    
+```scala
+trait Incrementing extends IntQueue {
+  abstract override def put(x: Int) = super.put(x+1)
+}
+trait Filtering extends IntQueue {
+  abstract override def put(x: Int) = {
+    if (x >= 0) super.put(x)
+  }
+}
+```    
+　　有了这些修改特质，现在可以为特定的队列挑选想要的修改。举例来说，下面是一个既过滤掉负数同时还对所有数字加一的队列：    
+```scala
+val queue = new BasicIntQueue with Incrementing with Filtering
+```    
+　　*混入特质的顺序是重要的*，粗略地讲，越靠右出现的特质越先起作用。当你调用某个带有混入的类的方法时，最靠右端的特质中的方法最先被调用。如果
+那个方法调用super，它将调用左侧紧挨着它的那个特质的方法，以此类推。     
+
+***    
