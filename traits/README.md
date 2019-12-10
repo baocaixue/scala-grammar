@@ -256,3 +256,61 @@ val queue = new BasicIntQueue with Incrementing with Filtering
 那个方法调用super，它将调用左侧紧挨着它的那个特质的方法，以此类推。     
 
 ***    
+## Why-Not-Multiple-Inheritance    
+　　特质是一种从多个像类一样的结构继承的方式，不过它们跟许多其他语言中的多重继承有着很重大的区别。其中一个尤为重要：对super的解读。在多重继
+承中，super调用的方法在调用发生的地方就已经确定了。而特质中的super调用的方法取决于类和混入该类的特质的**线性化（linearization）**。正是
+这个差别让可叠加修改变为了可能。    
+　　考虑下面传统的多重继承的语言中要如何实现可叠加修改。     
+```scala
+//多重继承思维实验
+val q = new BasicIntQueue with  Incrementing with Doubling
+q.put(42)//应该会调用哪个put？
+```    
+　　第一个问题：这次执行的是哪一个put方法？也许规则是最后一个超类胜出，那么在本例中Doubling的put会被执行。Doubling于是对其参数翻倍，调用
+super.put，然后就结束了。不会有加一发生！同理，如果规则是首个超类胜出，那么结果的队列将对整数加一，但不会翻倍。这么一来没有一种顺序是可行的。    
+　　也许还可以尝试这样一种可能：让程序员自己指定调用super时到底是用哪一个超类的方法。例如，假设有下面这段Scala的代码，在这段代码中，super
+看上去显式地调用了Incrementing和Doubling:    
+```scala
+//多重继承思维实验
+trait MyQueue extends BasicIntQueue with Incrementing with Doubling {
+  def put(x: Int) = {
+    Incrementing.super.put(x)//并非真正的scala代码
+    Doubling.super.put(x)
+  }
+}
+```    
+　　这种方法会带来新的问题（相比这些问题，代码啰嗦点根本不算什么），这样做可能发生的情况是基类的put方法被调用两次：一次在加一的时候，另一次
+在翻倍的时候，不过两次都不是用加过一或翻过倍的值调用的。    
+　　简单来说，多重继承对这类问题并没有好的解决方案。需要回过头来重新设计，重新组织代码。相比较而言，用Scala特质的解决方案是很直截了当的，只
+需要简单地混入Incrementing和Doubling，Scala对特质中super的特殊处理完全达到了预期的效果。这种方案和多重继承相比，很显然有某种不一样，但是
+这个区别究竟是什么？    
+　　前面提到了，答案是*线性化*。当用new实例化一个类的时候，Scala会将类及它所有继承的类和特质都拿出来，将它们线地排列在一起。然后，当在某个
+类中调用super时，被调用的方法是这个链条中向上最近的那一个。如果除了最后一个方法外，所有的方法都调用了super，那么最终的结果就是叠加在一起的
+行为。    
+　　线性化的确切顺序在语言规格说明书里有描述。这个描述有点复杂，不过需要知道的要点是，在任何线性化中，类总是位于所有它的超类和混入的特质之前。
+因此，当写下super的方法时，那个方法绝对是在修改超类和混入特质的行为。    
+　　Scala的线性化的主要性质可以用下面的例子来说明：假定有一个Cat类，这个类继承自超类Animal和两个超特质Furry和FourLegged。而FourLegged
+又扩展自另一个特质HasLegs:    
+```scala
+class Animal
+trait Furry extends Animal
+trait HasLegs extends Animal
+trait FourLegged extends HasLegs
+class Cat extends Animal with Furry with FourLegged
+```    
+　　Cat类的继承关系和线性化如图所示。继承使用传统的UML表示法标记的：白色三角箭头表示继承，其中箭头的指向是超类型。黑色的箭头表示线性化，其中
+箭头指向的是super调用的解析方向。    
+　　![image](https://raw.githubusercontent.com/baocaixue/scala-grammar/master/traits/src/main/resources/Cat.jpg)    
+　　Cat的线性化从后到前的计算过程如下。Cat线性化的最后一个部分是其超类Animal的线性化。这段线性化直接被复制过来不加修改。由于Animal并不显式
+地扩展某个超类也没有混入任何超特质，它默认扩展自AnyRef，而AnyRef又扩展自Any。这样Animal的线性化看上去就是这样的：    
+　　Animal --> AnyRef --> Any    
+　　线性化的倒数第二个部分是首个混入（即Furry特质）的线性化，不过有已经出现在Animal线性化中的类都不再重复出现，*每个类在Cat的线性化当中只
+出现一次*。结果是：    
+　　Furry --> Animal --> AnyRef --> Any    
+　　在这个结果之前，是FourLegged的线性化，同样，任何已经在超类或已混入中拷贝过的类都不再重复出现：    
+　　FourLegged -> HasLegs -> Furry -> Animal --> AnyRef --> Any    
+　　最后，Cat线性化中的第一个类是Cat自己：    
+　　Cat --> FourLegged -> HasLegs -> Furry -> Animal --> AnyRef --> Any    
+
+***    
+
