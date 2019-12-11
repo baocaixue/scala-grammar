@@ -22,6 +22,7 @@
         <module>composition-and-inheritance</module>
         <module>scala-hierarchy</module>
         <module>traits</module>
+        <module>packages-and-imports</module>
     </modules>
 
     <properties>
