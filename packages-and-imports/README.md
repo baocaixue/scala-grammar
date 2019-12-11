@@ -45,4 +45,67 @@ package com {
 ```    
 
 ***    
+## Concise-Access-To-Related-Code    
+　　将代码按照包层次结构划分以后，不仅有助于浏览代码，同时也是在告诉编译器，同一个包中的代码之间存在某种相关性。在访问同一个包的代码时，Scala
+允许使用简短的，不带限定前缀的名称。    
+```scala
+package com {
+  package isaac {
+    class Navigator {
+      //不需要说com.isaac.StartMap
+      val map = new StarMap
+    }
+    class StarMap
+  }
+  class Ship {
+    //不需要说com.isaac.Navigator
+    val nav = new isaac.Navigator
+  }
+  package org {
+    class Fleet {
+      //不需要说com.Ship
+      def addShip() = new Ship
+    }
+  }
+}
+```    
+　　这里给出了三个例子。首先，一个类不需要前缀就可以在自己的包内被别人访问。这就是为什么new StarMap能够通过编译;其次，包自身可以从包含它的
+包里不带前缀地访问到。注意Navigator类是如何实例化的，new表达式出现在com包中，这个包包含了com.isaac包，因此可以简单地用isaac访问com.isaac
+包的内容;再次，用花括号打包语法，所有在包外的作用域内可以被访问的名称，在包内也可以访问到，参见Ship的实例化。    
+　　注意这类访问只有当你显式地嵌套打包时才有效。如果坚持每个文件只有一个包的做法，那么（就跟Java一样）只有那些在当前包内定义的名称才可以直接
+使用。如果花括号嵌套包让代码过于往右缩进，可以用用多个package子句但不使用花括号：    
+```scala
+package com
+package isaac
+class Fleet
+```    
+　　最后一个小技巧也很重要。有时，会遇到需要在非常拥挤的作用域内编写代码，包名互相遮挡。如下列代码所示，MissionControl类的作用域内包含了三
+个独立的名为launch的包！如何来分别引用Booster1、Booster2、Booster3呢？    
+```scala
+package launch {
+  class Booster3
+}
+package isaac {
+  package navigation {
+    package launch {
+      class Booster1
+    }
+    class MissionControl {
+      val booster1 = new launch.Booster1
+      val booster2 = new isaac.launch.Booster2
+      val booster3 = new _root_.launch.Booster3
+    }
+  }
+  package launch {
+    class Booster2
+  }
+}
+```    
+　　访问地一个很容易。直接引用launch会指向isaac.navigation.launch包，因为这是最近的作用域定义的launch包。因此可以简单地用launch.Booster1
+来引用第一个类。访问第二个也不难，可以用isaac.launch.Booster2，这样就可以清晰地表达想要的是哪一个包。那么问题就剩下第三个：考虑到嵌套的
+launch包遮挡了位于顶层的那一个，那如何访问Booster3呢？    
+　　为了解决这个问题，Scala提供了一个名为_root_的包，这个包不会跟任何用户编写的包冲突。换句话说，每个你能编写的顶层包都被当作是_root_包的
+成员。    
+
+***    
 
