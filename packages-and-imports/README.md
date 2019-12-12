@@ -108,4 +108,95 @@ launch包遮挡了位于顶层的那一个，那如何访问Booster3呢？
 成员。    
 
 ***    
+## Imports    
+　　在Scala中，可以用import子句引入包和它们的成员。被引用的项目可以用例如File这样的简单名称访问，而不需要限定名称，比如java.io.File：    
+```scala
+abstract class Fruit(val name: String, val color: String)
+object Fruits {
+  object Apple extends Fruit("apple", "red")
+  object Orange extends Fruit("orange", "orange")
+  object Pear extends Fruit("pear", "yellowish")
+  val menu = List(Apple, Orange, Pear)
+}
+```    
+　　import子句使得某个包或对象的成员可以只用它们的名字访问，而不需要在前面加上包名或对象名。下面是一些简单的例子：    
+```scala
+//到Fruit的便捷访问
+import com.isaac.ch13.importdemo.Fruit
+
+//到com包下所有成员的便捷访问
+import com._
+
+//到Fruits所有成员的便捷访问
+import com.isaac.ch13.importdemo.Fruits._
+```    
+　　第一个对应Java的单类型引入，而第二个对应Java的*按需（on-demand）* 引入。唯一的区别是Scala的按需引入跟在后面的是下划线（\_）而不是星
+号（\*）（毕竟\*号是个合法的标识符）。上述第三个引入子句对应Java对静态字段的引入。    
+　　Scala的引入实际上更加通用。首先，Scala的引入可以出现在任何地方，不仅仅是在某个编译单元的最开始，它们还可以引用任意值。比如：    
+```scala
+import com.isaac.ch13.importdemo.Fruit
+def showFruit(fruit: Fruit) = {
+  import fruit._
+  println(name + "s are " + color)
+}
+```    
+　　showFruit方法引入了其参数fruit（类型为Fruit）的所有成员。这样接下来的println语句就可以直接引用name和color。这两个引用等同于fruit.
+name和fruit.color。这种语法在需要用对象来表示模块时尤其有用。    
+    
+　　**Scala的灵活引入**    
+　　跟Java相比，Scala的import子句要灵活的多，主要区别有三点。在Scala中，引入可以：    
+* 出现在任意位置
+* 引用对象（不论是单例还是常规对象），而不只是包
+* 可以重命名或隐藏某些被引入的成员    
+    
+　　还有一点可以说明Scala的引入更灵活：它们可以引入包本身，而不仅仅是包中的非包成员。如果包嵌套的包想象成包含在上层包内，这样的处理就很自然。
+例如，在下面示例中，被引入的包是java.util.regex，这使得可以在代码中使用regex这个简单的名字。要访问java.util.regex包里的Pattern单例对象，
+可以直接用regex.Pattern：    
+```scala
+import java.util.regex
+
+class AStartB {
+  //访问java.util.regex.Pattern
+  val pat = regex.Pattern.compile("a*b")
+}
+```    
+　　Scala中的引入还可以重命名或隐藏指定的成员。做法是包在花括号内的*引入选择器子句（import selector clause）* 中，这个子句跟在那个要引入
+成员的对象后面。以下是一些例子：    
+```scala
+import com.isaac.ch13.importdemo.Fruits.{Apple, Orange}
+```    
+　　这只会从Fruits对象引入Orange和Apple两个成员。    
+```scala
+import com.isaac.ch13.importdemo.Fruits.{Apple => McIntosh, Orange}
+```    
+　　这会从Fruits对象引入Apple和Orange两个成员。不过Apple对象被重命名为McIntosh，因此代码中要么用`Fruits.Apple`要么用`McIntosh`来访问
+这个对象。重命名的子句的形式永远都是**原名 => 新名**。    
+```scala
+import java.sql.{Date => SDate}
+```    
+　　这会以SDate为名引入SQL日期类，这样就可以同时以Date这个名字引入Java的普通日期对象。    
+```scala
+import java.{sql => S}
+```    
+　　这会以S为名引入java.sql包，这样就可以编写类似S.Date这样的代码。    
+```scala
+import com.isaac.ch13.importdemo.Fruits.{_}
+```    
+　　这将从Fruits对象引入所有成员，跟`import com.isaac.ch13.importdemo.Fruits._`的含义是一样的。    
+```scala
+import com.isaac.ch13.importdemo.Fruits.{Apple => McIntosh, _}
+```    
+　　这将从Fruits对象引入所有的成员，但会把Apple重命名为McIntosh。    
+```scala
+import com.isaac.ch13.importdemo.Fruits.{Pear => _, _}
+```    
+　　这会引入除Pear外Fruits的所有成员。总之，引入选择器可以包含：    
+* 一个简单那的名称x。这将把x包含在引入的名称集里。
+* 一个重命名子句x => y。这会让名为x的成员以y的名称可见。
+* 一个隐藏子句x => \_。这会从引入名称集里排除掉x。
+* 一个捕获所有的“\_”。这回引入除了之前子句中提到的成员之外的所有成员。如果要给出捕获所有子句，它必须出现在引入选择器列表的末尾    
+
+　　开始给出的简单引入子句可以被视为带有选择器子句的特殊简写。例如，“import p.\_”等价于“import p.{\_}”，而“import p.n”等价于“import p.{n}”。    
+
+***    
 

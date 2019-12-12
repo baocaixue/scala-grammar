@@ -7,7 +7,7 @@ import java.io.{File, PrintWriter}
  * 贷出模式
  */
 object LoanPatternDemo {
-  def withPrintWriter(file: File, op: PrintWriter => Unit) = {
+  def withPrintWriter1(file: File, op: PrintWriter => Unit) = {
     withPrintWriter(file){
       op//客户端代码调用，这里应该是定义的函数字面量，这里完全用于演示目的
     }
