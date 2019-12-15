@@ -215,4 +215,129 @@ java.lang.Thread。
 由于scala的引入遮挡了java.lang的引入，因此StringBuilder这个简单的名称会引用到scala.StringBuilder，而不是java.lang.StringBuilder。    
 
 ***    
+## Access-Modifiers    
+　　包、类或对象的成员可以标上private和protected这样的访问修饰符。这些修饰符将对成员的访问限定在特定的代码区域。Scala对访问修饰符的处理大
+体上跟Java保持一致，不过也有些重要的区别。    
+
+### 私有成员    
+　　Scala对私有成员的处理跟Java类似。标为private的成员只在包含该定义的类或对象内部可见。在Scala中，这个规则同样适用于内部类。Scala在一致
+性方面做得比Java更好，但做法不一样。    
+```scala
+class Outer {
+  class Inner {
+    private def f() = println("f")
+    class InnerMost {
+      f()//OK
+    }
+  }
+  //(new Inner).f()//错误：无法访问f
+}
+```    
+　　在Scala中，像`(new Inner).f()`这样的访问方式是非法的，因为f在Inner中声明为private并且对f的调用并不是发生在Inner类内部。而第一次在
+InnerMost类中访问f是OK的，因为这个调用包含在Inner类内部。Java则对两种访问都允许，因为Java中可以从外部类访问其内部类的私有成员。    
+
+### 收保护的成员    
+　　跟Java相比，Scala对protected成员的访问也更严格。在Scala中，protected的成员只能从定义该成员的子类访问。而Java允许同一个包内的其他类
+访问这个类的收保护成员。Scala提供了另一种方式来达到这个效果（限定词），因此protected不需要为此放宽限制。    
+```scala
+package p {
+  class Super {
+    protected def f() = println("f")
+  }
+  class Sub extends Super {
+    f()
+  }
+  class Other {
+    //(new Super).f()//错误：无法访问f
+  }
+}
+```    
+
+### 公共成员    
+　　Scala并没有专门的修饰符用来标记公共成员：任何没有被标记为private或protected的成员都是公共的。公共成员可以在任何位置访问到。    
+
+### 保护的范围    
+```scala
+package bobsrockets
+
+package navigation {
+  private[bobsrockets] class Navigator {
+    protected[navigation] def useStartChart() = {}
+    class LegOfJourney {
+      private[Navigator] val distance = 100
+    }
+    private[this] var speed = 200
+  }
+}
+
+package launch {
+  import navigation._
+  object Vehicle {
+    private[launch] val guide = new Navigator
+  }
+}
+```    
+　　可以用限定词对Scala中的访问修饰符机制进行增强。形如`private[X]`或`protected[X]`的修饰符的含义是对此成员的访问限制“上至”X都是私有或
+保护的，其中X表示，某个包含该定义的包、类或单例对象。    
+　　带有限定词的访问修饰符让我们可以对成员的可见性做非常细粒度的控制，尤其是它允许我们表达Java中访问限制的语义，比如包内私有、包内受保护或到
+最外层嵌套类范围内私有等。这些用Scala中简单的修饰符是无法直接表达出来的。这种机制还允许我们表达那些在Java中表达的访问规则。    
+　　上面的示例中给出了使用多种访问限定词的用法。示例中，Navigator类被标记为`private[bobsrocket]`，其含义是这个类对bobsrocket包内所有类
+和对象都可见。具体来说，Vehicle对象中对Navigator的访问是允许的，因为Vehicle位于launch包，而launch是bobsrockets的子包。另一方面，所有
+bobsrocket包之外的代码都不能访问Navigator。    
+　　这个机制在那些跨多个包的大工程中非常有用。可以定义对工程中某些子包但对外部不可见的实体。这在Java中是无法做到的。一旦某个定义越过了包的边
+界，它就对整个世界可见的。    
+　　当然，private的限定词也可以是直接包含该定义包。比如示例中Vehicle对象的guide成员变量的访问修饰符。这样的访问修饰符跟Java的包内私有访问
+是等效的。    
+　　LegOfJourney.distance上private修饰符的作用：    
+
+无访问修饰符 | 公共访问    
+--- |  ---     
+private\[bobsrockets\] | 外围包内访问    
+private\[navigation\] | 与Java中的包可见性相同    
+private\[Navigator\] | 与Java中的private相同    
+private\[LegOfJourney\] | 与Scala中的private相同    
+private\[this\] | 仅在当前对象内访问    
+
+　　所有的限定词也可以应用在protected上，跟private上的限定词作用一样。也就是说，如果在C类中使用protected\[X\]这个修饰符，那么C的所有子
+类，以及X表示的包、类或对象中，都能访问这个被标记的定义。例如上面示例中的useStarChart方法在Navigator的所有子类，以及navigation包中的代
+码都可以访问。这样一来，这里的含义就跟Java的protected是完全一样的。    
+　　private的限定词也可以引用包含它的类或对象。例如，示例代码中LegOfJourney类的distance变量被标记为private\[Navigator\]，因此整个
+Navigator类都可以访问。这就达到了跟Java中内部类的私有成员一样的访问能力。当C是最外层的嵌套时，private\[C\]跟Java的private就是一样的效
+果。    
+　　最后，Scala还提供了比private限制范围更小的访问修饰符。被标记为private\[this\]的定义，只能包含该定义的同一个对象中访问。这样的定义被
+称作是*对象私有（object-private）* 的。例如，示例中Navigator类的speed定义就是对象私有的。这意味着所有对它的访问不仅必须来自Navigator
+类内部，并且还必须是来自Navigator的同一实例。因此Navigator中“speed”和“this.speed”是合法的访问。    
+　　而如下访问则是不被允许的，虽然它来自Navigator类内部：    
+```scala
+val other = new Navigator
+other.speed //该行不鞥被编译
+```    
+　　将一个成员标记为private\[this\]，保证了它不会被同一个类的其他对象看到。这对于文档来说是有意义的。同时也方便我们编写更通用的型变注解。    
+
+### 可见性和伴生对象    
+　　在Java中，静态成员和实例成员同属一个类，因此访问修饰符对它们的应用方式是统一的。但Scala没有静态成员;而是用伴生对象来承载那些只存一次的
+成员。例如下面代码中，Rocket对象就是Rocket类的伴生对象：    
+```scala
+class Rocket {
+  import Rocket.fuel
+  private def canGoHomeAgain = fuel > 20
+}
+
+object Rocket {
+  private def fuel = 10
+  def chooseStrategy(rocket: Rocket) = {
+    if (rocket.canGoHomeAgain)
+      goHome()
+    else
+      pickAStar()
+  }
+  def goHome() = {}
+  def pickAStar() = {}
+}
+```    
+　　Scala的访问规则在private和protected的处理上给伴生对象和类保留了特权。一个类会将它的所有访问权跟它的伴生对象共享，反过来也一样。    
+　　Scala和Java在修饰符的方面的确很相似，不过有一个重要例外：protected static。Java中类C的protected static成员可以被C的所有子类访问。
+而对于Scala的伴生对象而言，protected的成员没有意义，因为单例对象没有子类。    
+
+***    
 
