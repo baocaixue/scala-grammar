@@ -23,6 +23,7 @@
         <module>scala-hierarchy</module>
         <module>traits</module>
         <module>packages-and-imports</module>
+        <module>assertions-and-tests</module>
     </modules>
 
     <properties>
