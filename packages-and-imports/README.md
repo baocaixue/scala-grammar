@@ -340,4 +340,30 @@ object Rocket {
 而对于Scala的伴生对象而言，protected的成员没有意义，因为单例对象没有子类。    
 
 ***    
+## Package-Objects    
+　　前面这些能添加到包里的代码有类、特质和单例对象。这些是放在包内顶层最常见的定义。不过Scala允许放在包级别的并不止上述这些——任何能放在类级
+别的定义，都能放到包级别。如果希望有在整个包都能用的助手方法，大可将它放在包的顶层。    
+　　具体做法是把定义放在*包对象（package object）* 中。每个包都允许有一个包对象，任何被放在包对象里的定义都会被放做这个包本身的成员。    
+```scala
+//位于文件bobsdelights/package.scala中
+package object bobsdelights {
+  def showFruit(fruit: Fruit) = {
+    import fruit._
+    println(name + "s are" + color)
+  }
+}
 
+//位于PrintMenu.scala中
+package  pritmenu
+
+
+object PrintMenu {
+  def def main(args: Array[String]): Unit = {
+    for (fruit <- Fruits.menu) = {
+      showFruit(fruit)
+    }
+  }
+}
+```    
+　　参考上面代码示例。package.scala这个文件包含了一个bobsdelights包的包对象。从语法上讲，包对象跟前面展示的花括号“打包”很像。唯一的区别
+是包对象包含了一个object关键字。这是一个包对象，而不是一个包。花括号括起来的部分可以包含任何想添加的定义。    
