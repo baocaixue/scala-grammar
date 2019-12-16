@@ -45,4 +45,40 @@ AssertionError。
 在如何编写外部测试上，这些测试自己提供测试数据，并且独立于应用程序执行。    
 
 ***    
+## Testing-In-Scala    
+　　用Scala写测试，有很多选择，从已被广泛认可的Java工具，比如JUnit和TestNG，到用Scala编写的工具，比如ScalaTest、specs2和ScalaCheck。
+首先，从ScalaTest开始。    
+　　ScalaTest是最灵活的Scala测试框架：可以很容易地定制它来解决不同的问题。ScalaTest的灵活性意味着团队可以使用任何最能满足他们需求的测试
+风格。例如，对于熟悉JUnit的团队，FunSuite风格是最舒适和熟悉的：    
+```scala
+import org.scalatest.FunSuite
+import Element.elem
+
+class ElementSuite extends FunSuite{
+  test("elem result should have passed width") {
+    val ele = elem('x', 2, 3)
+    assert(ele.width == 2)
+  }
+}
+```    
+　　ScalaTest的核心概念是*套件（suite）* ，即测试的集合。所谓测试可以是任何带有名称，可以被启动，并且要么成功，要么失败，要么被暂停，要么
+被取消的代码。在ScalaTest中，Suite特质是核心组合单元。Suite声明了一组“生命周期”方法，定义了运行测试的默认方法，我们也可以重写这些方法来
+对测试的编写和运行进行定制。    
+　　ScalaTest提供了*风格特质（style trait）* ，这些特质扩展Suite并重写了生命周期方法来支持不同的测试风格。它还提供了*混入特质*，这些特质
+重写了生命周期方法来满足特定的测试需要。可以组合Suite的风格和混入特质来定义测试类，以及通过编写Suite实例来定义测试套件。    
+　　上面示例中的测试类扩展自FunSuite，这就是风格特质的一个例子。FunSuite中的“Fun”指的是函数;而“test”是定义在FunSuite中的一个方法，该方
+法被ElementSuite的主构造方法调用。可以在圆括号中用字符串给出测试的名称，并在花括号中给出具体的测试代码。测试代码是一个以传名参数传入test的
+函数，test将这个函数登记下来，稍后执行。    
+　　ScalaTest已经被集成进常见的构建工具（比如sbt和Maven）和IDE（比如IntelliJ IDEA和Eclipse）。也可以通过ScalaTest的Runner应用程序直
+接运行Suite，或者在Scala解释器中简单地调用它的execute方法，比如：    
+```shell script
+scala> (new ElementSuite).execute()
+ElementSuite:
+- elem result should have passed width
+```    
+　　ScalaTest的所有风格，包括FunSuite在内，都被设计为鼓励编写专注的、带有描述性名称的测试。不仅如此，所有的风格都会生成规格说明书般的输出，
+方便在干系人之间交流。所选择的风格只规定了测试代码长什么样，不论选择什么样的风格，[ScalaTest](http://www.scalatest.org/)的运行机制都始
+终保持一致。    
+
+***    
 
