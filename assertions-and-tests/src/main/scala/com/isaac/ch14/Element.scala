@@ -53,6 +53,7 @@ object Element {
   }
 
   private class UniformElement(ch: Char, override val width: Int, override val height: Int) extends Element {
+    require(width >= 0 && height >= 0)
     private val line = ch.toString * width
 
     def contents: Array[String] = Array.fill(height)(line)

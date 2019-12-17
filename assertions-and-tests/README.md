@@ -1,7 +1,7 @@
 # 断言和测试    
 - 断言...................................................[1](#Assertion)
 - 用Scala写测试...................................................[2](#Testing-In-Scala)
-- 失败报告...................................................[3](#Infomative-Failure-Reports)
+- 失败报告...................................................[3](#Informative-Failure-Reports)
 - 作为规格说明的测试...................................................[4](#Tests-As-Specifications)
 - 基于性质的测试...................................................[5](#Property-Based-Testing)
 - 组织和运行测试...................................................[6](#Organizing-And-Running-Tests)    
@@ -79,6 +79,57 @@ ElementSuite:
 　　ScalaTest的所有风格，包括FunSuite在内，都被设计为鼓励编写专注的、带有描述性名称的测试。不仅如此，所有的风格都会生成规格说明书般的输出，
 方便在干系人之间交流。所选择的风格只规定了测试代码长什么样，不论选择什么样的风格，[ScalaTest](http://www.scalatest.org/)的运行机制都始
 终保持一致。    
+
+***    
+## Informative-Failure-Reports    
+　　如果断言失败了，失败报告就会包括文件名和该断言所在的行号，以及一条翔实的错误消息：    
+```shell script
+scala> val width = 3
+width: Int = 3
+scala> assert(width == 2)
+org.scalatest.exception.TestFailedException:
+    3 did not equal 2
+```    
+　　为了在断言失败时提供描述性的错误消息，ScalaTest会在编译时分析传入每次assert调用的表达式。如果想要看到更详细的关于断言失败的信息，可以
+使用ScalaTest的DiagrammedAssertions，其错误消息会显示传入assert的表达式的一张示意图：    
+```shell script
+scala> assert(List(1, 2, 3).contains(4))
+org.scalatest.exceptions.TestFailedException:
+    assert(List(1, 2, 3).contains(4))
+           |    |  |  |  |        |
+           |    1  2  3  false    4
+           List(1, 2, 3)
+```    
+　　ScalaTest的assert方法并不在错误消息中区分实际和预期的结果，它们仅仅是提示我们左侧的操作元跟右侧的操作元不想等，或者在示意图中显示出表
+达式的值。如果想强调实际和预期的差别，可以换用ScalaTest的assertResult方法：    
+```scala
+assertResult(2) {
+  ele.width
+}
+```    
+　　通过这个表达式，表明了预期花括号中的代码的执行结果是2。如果换括号中的代码的执行结果是3,将会在失败报告中看到“Expected 2, but got 3”这
+样的消息。
+　　如果想要检查某个方法抛出某个预期的异常，可以用ScalaTest的assertThrows方法：    
+```scala
+assertThrows[IllegalArgumentException] {
+  ele('x', -2, 3)
+}
+```    
+　　如果花括号中的代码抛出了不同于预期的异常，或者并没有抛出异常，assertThrow将以TestFailedException异常中止。将在失败报告中得到一个对
+排查问题有帮助的错误消息，比如：    
+```
+Expected IllegalArgumentException to be thrown,
+    but NegativeArraySizeException was thrown.
+```    
+　　而如果代码以传入的异常类的实例异常中止（即代码抛出了预期的异常），assertThrows将正常返回。如果想要进一步检视预期的异常，可以使用intercept
+而不是assertThrows。intercept方法跟assertThrows的运行机制不同，不过当异常被抛出时，intercept将返回这个异常：    
+```scala
+val caught = 
+    itercept[ArithmeticException] {
+      1 / 0
+    }
+```    
+　　简而言之，ScalaTest的断言会尽其所能提供有助于诊断和修复代码问题的失败消息。    
 
 ***    
 
