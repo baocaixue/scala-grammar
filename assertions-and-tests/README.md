@@ -132,4 +132,77 @@ val caught =
 　　简而言之，ScalaTest的断言会尽其所能提供有助于诊断和修复代码问题的失败消息。    
 
 ***    
+## Tests-As-Specifications    
+　　*行为驱动开发（BDD）* 测试风格的重点是编写人可读的关于代码预期行为的规格说明，同时给出验证代码具备指定行为的测试。ScalaTest包含了若干
+特质来支持这种风格的测试。西面示例给出了这样的一个特质FlatSpec的例子：    
+```scala
+import org.scalatest.{FlatSpec, Matchers}
+import Element.elem
+
+/*
+  用ScalaTest的FlatSpec描述并测试代码行为
+ */
+class ElementSpec extends FlatSpec with Matchers{
+  "A UniformElement" should "have a width equal to the passed value" in {
+    val ele = elem('x', 2, 3)
+    ele.width should be (2)
+  }
+
+  it should "have a height equal to the passed value" in {
+    val ele = elem('x', 2, 3)
+    ele.height should be (3)
+  }
+
+  it should "throw an IAE if passed a negative width" in {
+    an [IllegalArgumentException] should be thrownBy {
+      elem('x', -2, 3)
+    }
+  }
+}
+```    
+　　在FlatSpec中，我们以*规格子句（specifier clause）* 的形式编写测试。我们先写下以字符串表示的要测试的*主题（subject）*（即“A 
+UniformElement”），然后是should（must或can），再然后是一个描述该主题需要具备某种行为的字符串，再接下来是in。在in后面的花括号中，我们编
+写用于测试指定行为的代码。在后续的子句中，可以用it来指代最近给出的主题。当一个FlatSpec被执行时，它将每个规格子句作为ScalaTest测试运行。FlatSpec
+（以及ScalaTest的其他规格说明特质）在运行后将生成读起来像规格说明书的输出。例如，以下就是在解释器中运行上述示例的ElementSpec时输出的样子：    
+```shell script
+scala> (new ElementSpec).execute()
+A UniformElement
+- should have a width equal to the passed value
+- should have a height equal to the passed value
+- should throw an IAE if passed a negative width
+```    
+　　上面示例中还展示了ScalaTest的*匹配器（matcher）* 领域特定语言（DSL）。通过混入Matchers特质，可以编写读上去更像自然语言的断言。ScalaTest
+在其DSL中提供了许多匹配器，并允许你用定制的失败消息定义新的matcher。示例中的匹配器包括“should be”和“an \[...\] should be thrownBy 
+{...}”这样的语法。如果相比should更喜欢用must，也可以选择混入MustMatchers。例如，混入MustMatchers将允许编写这样的表达式：    
+```scala
+result must be >= 0
+map must contain key 'c'
+```    
+　　如果最后的断言失败了，将看到类似于下面这样的错误消息：    
+```
+Map('a' -> 1, 'b' -> 2) did not contain key 'c'
+```    
+　　[specs2](http://etorreborre.github.io/spec2/)测试框架是Eric Torreborre用Scala编写的开源工具，也支持BDD风格的测试，不过语法可
+能不太一样。    
+　　BDD的一个重要思想是测试可以在那些决定软件系统应该做什么的人、那些实现软件的人和那些判定软件是否完成并正常工作的人之间架起一道沟通的桥梁。
+虽然ScalaTest和specs2的任何一种风格都可以这样来用，但是ScalaTest的FeatureSpec是专门设计的：    
+```scala
+import org.scalatest.{FeatureSpec, GivenWhenThen}
+
+class TVSetSpec extends FeatureSpec with GivenWhenThen{
+  feature("TV power button") {
+    scenario("User presses power button when TV is off") {
+      Given("a TV set that is switched off")
+      When("the power button is pressed")
+      Then("the TV should switch on")
+      pending
+    }
+  }
+}
+```    
+　　FeatureSpec的设计目的是引导关于软件需求的对话：必须指明具体的*功能（feature）*，然后用*场景（scenario）* 来描述这些功能。Given、When、
+Then方法（由GivenWhenThen特质提供）能帮助我们将对话聚焦在每个独立场景的具体细节上。最后的pending调用表明测试和实际的行为都还没有实现——这
+里只是规格说明。一旦所有的测试和给定的行为都实现了，这些测试就会通过，我们就可以说需求已经满足。    
+
+***    
 
