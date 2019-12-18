@@ -205,4 +205,39 @@ Then方法（由GivenWhenThen特质提供）能帮助我们将对话聚焦在每
 里只是规格说明。一旦所有的测试和给定的行为都实现了，这些测试就会通过，我们就可以说需求已经满足。    
 
 ***    
+## Property-Based-Testing    
+　　Scala的另一个有用的测试工具是ScalaCheck，这是由Rickard Nilsson编写的开源框架。ScalaCheck让你能够指定被测试的代码必须满足的性质。对
+每个性质，ScalaCheck都会生成数据并执行断言，检查代码是否满足该性质。下面示例给出了一个混入了PropertyChecks特质的WordSpec的ScalaTest中
+使用ScalaCheck的例子：    
+```scala
+import org.scalatest.WordSpec
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.MustMatchers._
+import Element.elem
 
+class ElementSpec1 extends WordSpec with PropertyChecks{
+  "elem result" must {
+    "have passed width" in {
+      forAll{ w: Int =>
+        whenever (w > 0) {
+          elem('x', w, 3).width must equal (w)
+        }
+      }
+    }
+  }
+}
+```    
+　　WordSpec是一个ScalaTest的风格类。PropertyChecks特质提供了若干forAll方法，让你可以将基于性质的测试跟传统的基于断言或基于匹配器的测
+试混合在一起。在本例中，检查了一个elem工厂必须需满足的性质。ScalaCheck的性质在代码中表现为以参数形式接收性质断言所需的函数值。这些数据将由
+ScalaCheck代为生成。对于示例中的性质，数据是名为w的整数，代表宽度。在这个函数的函数体中，这段代码：    
+```scala
+whenever (w > 0) {
+  elem('x', w, 3).width must equal (w)
+}
+```    
+　　whenever子句表达的意思是，只要左边的表达式为true，那么右边的表达式也必须为true。本例中，只要w大于0,代码块中的表达式就必须为true。当
+传给elem工厂的宽度跟工厂返回Element的宽度一致时，本例右侧表达式就会交出true。    
+　　只需要这样一小段代码，ScalaCheck就会帮助我们生成数百条w可能的取值并对每一个执行测试，尝试找出不满足该性质的值。如果对于ScalaCheck尝试
+的每个值，该性质都满足，测试就通过了。否则，测试将以TestFailedException终止，这个异常会包含关于造成该测试失败的指的信息。    
+
+***    

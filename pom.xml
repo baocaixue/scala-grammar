@@ -59,6 +59,14 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.scalacheck</groupId>
+            <artifactId>scalacheck_2.12</artifactId>
+            <version>1.13.5</version>
+            <scope>test</scope>
+        </dependency>
+
+
     </dependencies>
 
     <build>
