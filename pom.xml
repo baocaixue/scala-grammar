@@ -24,6 +24,7 @@
         <module>traits</module>
         <module>packages-and-imports</module>
         <module>assertions-and-tests</module>
+        <module>case-classes-and-pattern-matching</module>
     </modules>
 
     <properties>
