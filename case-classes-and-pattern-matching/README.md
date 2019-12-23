@@ -263,4 +263,36 @@ expr match {
 这个case的结果就是e，这好似因为e跟expr的值相同，但是少了一次求绝对值的操作。    
 
 ***    
+## Pattern-Guards    
+　　有时候语法级的模式匹配不够精确。举例来说，假定我们需要公式化一个简单规则，即用乘以2（e * 2）来替换对两个相同操作元的加法（e + e）。在
+表示Expr中，下面这样的表达式：    
+　　`BinOp("+", Var("x"), Var("x"))`    
+　　应用该简化规则后将得到：    
+　　`BinOp("*", Var("x"), Number(2))`    
+　　而如果使用如下这样来定义规则：    
+```scala
+def simplifyAdd(e: Expr) = e match {
+  case BinOp("+", x, x) => BinOp("*", x, Number(2))
+  case _ => e
+}
+```    
+　　这样做会失败，因为Scala要求模式是线性的：*同一个模式变量在模式中只能出现一次*。不过，我们可以用*模式守卫*来重新定义这个匹配逻辑：    
+```scala
+def simplifyAdd(e: Expr) = e match {
+  case BinOp("+", x, y) if x == y =>
+    BinOp("*", x, Number(2))
+  case _ => e
+}
+```    
+　　模式守卫出现在模式之后，并以if打头。模式守卫可以是任意的布尔表达式，通常会引用到模式中的变量。如果存在模式守卫，这个匹配仅在模式守卫值
+得到为true时才会成功。因此，上面提到的首个case只能匹配那些两个操作元相等的二元操作。    
+　　以下是其他一些带有守卫的模式示例：    
+```scala
+//只匹配正整数
+case n: Int if n > 0 => ...
+//只匹配以字母'a'打头的字符串
+case s: String if s(0) == 'a' => ...
+```    
+
+***    
 
