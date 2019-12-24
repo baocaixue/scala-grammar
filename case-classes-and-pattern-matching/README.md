@@ -295,4 +295,23 @@ case s: String if s(0) == 'a' => ...
 ```    
 
 ***    
+## Pattern-Overlaps    
+　　模式会按照代码中的顺序逐个被尝试。下面展示了模式中的case出现顺序的重要性：    
+```scala
+def simplifyAll(expr: Expr): Expr = expr match {
+  case UnOp("-", UnOp("-", e)) =>
+    simplifyAll(e) //取反
+  case BinOp("+", e, Number(0)) =>
+    simplifyAll(e)
+  case BinOp("*", e, Number(1)) =>
+    simplifyAll(e)
+  case UnOp(op, e) =>
+    UnOp(op, simplifyAll(e))
+  case BinOp(op, l, r) =>
+    BinOp(op, simplifyAll(l), simplifyAll(r))
+  case _ => expr
+}
+```    
+
+***    
 
