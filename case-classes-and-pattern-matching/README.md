@@ -333,4 +333,27 @@ def describe(e: Expr): String = (e: @unchecked) match {
 ```    
 
 ***    
+## The-Option-Type    
+　　Scala由一个名为Option的标准类型来表示可选值。这样的值可以有两种形式：`Some(x)`，其中x是那个实际的值;或者`None`对象，代表没有值。    
+　　Scala集合类的某些标准操作会返回可选值。比如，Scala的Map有一个get方法，当传入的键有对应的值时，返回`Some(value)`;而当传入的键在Map中
+没有定义时，返回`None`。    
+　　将可选值解开的最常见方式是通过模式匹配：   
+```scala
+def show(x: Option[String]) = x match {
+  case Some(s) => s
+  case None => "?"
+}
+```    
+　　Scala程序经常用到Option类型。可以把这个跟Java中用null来表示无值做比较。举例来说，java.util.HashMap的get方法要么返回存放在HashMap
+中的某个值，要么（在值未找到时）返回null。这种方式对Java来说是可以的，但很容易出错，因为在实践当中要想跟踪某个程序中的哪些变量可以为null是
+一件困难的事。    
+　　如果某个变量允许为null，那么必须记住在每次用到它的时候都要判空（null）。如果忘记了，那么运行时就有可能出现NullPointerException。由于
+这样的类异常可能并不经常发生，在测试过程中也就很难发现。对Scala而言，这种方式完全不能工作，因为Scala允许在哈希映射中存放值类型的数据，而null
+并不是值类型的合法元素。例如，一个`HasMap[Int, Int]`不可能用返回null来表示“无值”。    
+　　Scala鼓励我们使用Option来表示可选值。这种处理可选方式跟Java相比有若干优势。首先，某个类型为`Option[String]`的变量对应一个可选的String，
+跟某个类型为String的变量是一个可选的String（可能为null）相比，要直观的多。不过最重要的是，我们之前描述的那种在不检查某个变量是否为null就
+开始用它的编程错误在Scala中直接变成了类型错误。如果某个变量的类型为`Option[String]`，而我们把它当作String来用，这样的Scala程序是无法编
+译通过的。    
+
+***    
 
