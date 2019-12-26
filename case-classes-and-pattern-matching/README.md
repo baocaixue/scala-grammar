@@ -356,4 +356,91 @@ def show(x: Option[String]) = x match {
 译通过的。    
 
 ***    
+## Patterns-Everywhere    
+　　Scala中很多地方都允许使用模式，并不仅仅是match表达式。    
+
+### 变量定义中的模式    
+　　每当定义一个val或var，都可以用模式而不是简单的标识符。例如，可以将一个元组解开并将其中的每个元素分别赋值给不同的变量：    
+```scala
+val myTuple = (123, "aaa")
+val (number, string) = myTuple
+```    
+　　这个语法结构在处理样例类时非常有用。如果知道要处理的样例类是什么，就可以用一个模式来析构它：    
+```scala
+val expr = new BinOp("*", Number(5), Number(1))
+val BinOp(op, left, right) = expr
+```    
+
+### 作为偏函数的case序列    
+　　用花括号包起来的一系列case（可选分支）可以用在任何允许出现函数字面量的地方。本质上讲，case序列就是一个函数字面量，只是更加通用。不像普通
+函数那样只有一个入口和参数列表，case序列可以有多个入口，每个入口都有自己的参数列表。每个case对应该函数的一个入口，而该入口的参数列表用模式
+来指定。每个入口的逻辑主体是case右边的部分。    
+```scala
+def withDefault: Option[Int] => Int = {
+  case Some(x) => x
+  case None => 0
+}
+```    
+　　该函数体有两个case。第一个case匹配Some，返回Some中的值。第二个case匹配None，返回默认值0。这套机制对于Akka这个actor类库而言十分有用，
+因为有了它，Akka可以用一组case来定义它的receive方法：    
+```scala
+var sum = 0
+def receive = {
+  case Data(byte) => sum += byte
+  case GetChecksum(requester) => 
+    val checkSum = ~(sum & 0xFF) + 1
+    requester ! checkSum
+}
+```    
+　　还有另一点值得注意：通过case序列得到的是一个*偏函数（partial function）*。如果将这样一个函数应用到它不支持的值上，它会产生一个运行时
+异常。例如，这里有一个返回整数列表中第二个元素的偏函数：    
+```scala
+val second: List[Int] => Int = {
+  case x :: y :: _ => y
+}
+```    
+　　在编译时，编译器会正确地发出警告，我们的匹配并不全面：`warning: match is not exhaustive!`。如果传入一个三元素列表，这个函数会执行
+成功，而如果传入一个空列表就会报错（MatchError）。    
+　　如果想检查某个偏函数是否对某个入参有定义，必须告诉编译器要处理的是偏函数。`List[Int] => Int`这个类型涵盖了所有从整数列表到整数的函数，
+不论这个函数是偏函数还是全函数。仅涵盖从整数列表到整数的偏函数的类型写作`PartialFunction[List[Int], Int]`。    
+```scala
+val second: PartialFunction[List[Int], Int] = {
+  case _ :: y :: _ => y
+}
+```    
+　　偏函数定义了一个`isDefinedAt`方法，可以用来检查该函数是否对某个特定的值有定义。在本例中，这个函数对任何至少有两个元素的列表都有定义。    
+　　偏函数的典型用例是模式匹配函数字面量，就像前面这个例子。事实上，这样的表达式会被Scala编译器翻译成偏函数，这样的翻译发生了两次：一次是
+实现真正的函数，另一次是测试这个函数是否对指定值有定义。    
+　　举例来说，函数字面量`{ case x::y::_ => y }`将被翻译成如下的偏函数值：    
+```scala
+new PartialFunction[List[Int], Int] {
+  override def apply(xs:  List[Int]): Int = xs match {
+    case x::y::_ => y
+  }
+  
+  override def isDefinedAt(x:  List[Int]): Boolean = x match {
+    case x::y::_ => true
+    case _ => false
+  }
+}
+```    
+　　只要函数字面量声明的类型是`PartialFunction`，这样的翻译就会生效。如果声明为`Function1`，或没有声明，那么函数字面量对应的就一定是一个
+*全函数（complete function）*。    
+　　一般来说，我们应该尽量使用全函数，因为偏函数允许运行时出现错误，而编译器帮不了我们。不过有时候偏函数也特别有用。你也许能确信不会有不能处
+理的值传入，也可能会用到那种预期偏函数的框架，在调用函数之前，总是会先用`isDefinedAt`做一次检查。    
+
+### for表达式中的模式    
+　　还可以在for表达式中使用模式：    
+```scala
+val capitals = Map("China" -> "Beijing", "France" -> "Paris")
+for ((country, city) <- capitals) println("The capital of" + country + " is " + city)
+```    
+　　示例中给出的对偶（pair）模式很特别，因为这个匹配永远不会失败。的确，capitals交出一些列的对偶，因此可以确信每个生成的对偶都能跟对偶模式
+匹配上。不过某个模式不能匹配某个生成的值的情况也同样存在：    
+```scala
+  val results = List(Some("apple"), None, Some("orange"))
+  for (Some(fruit) <- results) println(fruit)
+```    
+
+***    
 
