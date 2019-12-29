@@ -25,6 +25,7 @@
         <module>packages-and-imports</module>
         <module>assertions-and-tests</module>
         <module>case-classes-and-pattern-matching</module>
+        <module>working-with-list</module>
     </modules>
 
     <properties>
