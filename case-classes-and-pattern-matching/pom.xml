@@ -13,5 +13,12 @@
     <artifactId>case-classes-and-pattern-matching</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.isaac</groupId>
+            <artifactId>composition-and-inheritance</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
     
 </project>
