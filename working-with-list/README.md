@@ -67,4 +67,26 @@ val empty = Nil
 这个操作符是右结合的：`A :: B :: C`会被翻译成`A :: (B :: C)`。因此，可以在前面的定义中去掉圆括号。    
 
 ***    
+## Basic-Operations-On-Lists    
+　　对列表的所有操作都可以用下面这三项来表述：    
+- head    返回列表的第一个元素
+- tail    返回列表中除第一个外的所有元素
+- isEmpty    返回列表是否为空列表    
+　　这些操作在List类中定义为方法。head和tail方法只对非空列表有定义。当从一个空列表调用时，它们将抛出异常：
+`java.util.NoSuchElementException: head of empty list`。    
+　　作为如何处理列表的例子，考虑按升序排列一个数字列表的元素。一个简单的做法是*插入排序（insertion sort）*，这个算法的工作原理如下：对于非
+空列表`x :: xs`，先对xs排序，然后将第一个元素x插入到这个排序结果中正确的位置：    
+```scala
+def sort(xs: List[Int]): List[Int] = {
+  if (xs.isEmpty) Nil
+  else insert(xs.head, sort(xs.tail))
+}
+def insert(head: Int, sortedTail: List[Int]): List[Int] = {
+  if (sortedTail.isEmpty || head <= sortedTail.head) head :: sortedTail
+  else sortedTail.head :: insert(head, sortedTail.tail)
+}
+```    
 
+***    
+## List-Patterns    
+　　
