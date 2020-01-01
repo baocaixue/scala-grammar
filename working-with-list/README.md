@@ -89,4 +89,33 @@ def insert(head: Int, sortedTail: List[Int]): List[Int] = {
 
 ***    
 ## List-Patterns    
-　　
+　　列表也可以用模式匹配解开。列表模式可以逐一对应到列表表达式。既可以用`List(...)`这样的模式来匹配列表的所有元素，也可以用`::`操作符和Nil
+常量一点点地将列表解开：    
+```scala
+val fruit = List("apples", "oranges", "pears")
+val List(a, b, c) = fruit//a:"apples"  b:"oranges"  c:"pears"
+val a1 :: b1 :: c1 :: Nil = fruit
+```    
+　　关于List的模式匹配    
+```
+   不论是List(...)还是::都不满足前面说到的可能出现的模式的形式。事实上，List(...)是一个由类库定义的提取器（extractor）模式的实例。而
+x :: xs这样的“cons”模式是中缀操作模式的一个特例。作为表达式，中缀操作等同于一次方法调用。对模式而言，规则是不同的：作为模式，p op q这样的
+中缀操作等同于op(p, q)。也就是说，中缀操作符op是被当作构造方法模式处理的。具体来说，x :: xs这个表达式相当于::(x, xs)。
+   这里透露一个细节，应该有一个名为::的类与这个模式构造方法想对应。的确有这么一个类，它的名字叫scala.::，并且就是用来构建非空列表的。因此
+::在Scala中出现了两次，一次作为scala包中的一个类的名字，一次是在List类的方法名。::方法的作用是产出一个scala.::类的实例。
+```    
+　　使用模式是用基本方法head、tail和isEmpty来解开列表的变通方式，例如，我们再次实现插入排序：    
+```scala
+def sort(xs: List[Int]): List[Int] = xs match {
+  case List() => List()
+  case x :: xs1 => insert(x, sort(xs1))
+}
+def insert(head: Int, sortedTail: List[Int]): List[Int] = sortedTail match {
+  case List() => List(head)
+  case y :: ys => if (head <= y) head :: sortedTail else y :: insert(head, ys)
+}
+```    
+　　通常，对列表做模式匹配比用方法来解构更清晰，因此模式匹配应该成为你处理列表的工具箱的一部分。    
+
+***    
+
