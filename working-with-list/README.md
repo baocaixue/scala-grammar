@@ -178,3 +178,54 @@ list.reverse.head == list.last
 list.reverse.tail == list.init
 ```    
 
+### 前缀和后缀：drop、take和splitAt    
+　　drop和take是对tail和init的一般化。它们返回的是列表任意长度的前缀或后缀。表达式“xs take n”返回列表的前n个元素。如果n大于xs.length，
+那么将返回整个列表。操作“xs drop n”返回列表xs除了前n个元素之外的所有元素。如果n大于等于xs.length，那么就返回空列表。    
+　　splitAt操作将列表从指定的下标位置切开，返回这两个列表组成的对偶。它的定义来自如下这个等式：    
+```
+xs splitAt n    等于    (xs take n, xs drop n)
+```    
+　　不过，splitAt会避免遍历xs列表两次。    
+
+### 元素选择：apply和indices    
+　　apply方法支持从任意位置选取元素。不过相对于数组而言，对列表的这项操作并不是那么常用。跟其他类型一样，当对象出现在方法调用中函数出现的位
+置时，编译器会帮助插入apply。所以`list(1)`和`list apply 1`是等效的。    
+　　对列表而言，从任意位置选取元素的操作之所以不那么常用，是因为xs(n)的耗时跟下标n成正比。事实上，apply是通过drop和head定义的：    
+``` 
+xs apply n    等于    (xs drop n).head
+```    
+　　indices方法返回包含了指定列表的所有有效下标的列表。    
+
+### 扁平化列表：flatten    
+　　flatten方法接收一个列表的列表并将它扁平化，返回单个列表。    
+
+### 将列表zip起来：zip和unzip    
+　　zip操作接收两个列表，返回一个由对偶组成的列表。如果两个列表长度不同，那么任何没有配对上的元素将会被丢弃。一个有用的特例是将列表和它的下
+标zip起来。最高效的做法是用`zipWithIndex`方法，这个方法会将列表中的每个元素和它出现自爱列表中的位置组合成对偶。    
+　　任何元组的列表也可以通过unzip方法转换回由列表组成的元组。    
+
+### 显示列表：toString和mkString    
+　　toString操作返回列表的标准字符串表现形式。如果需要不同的表现形式，可以用mkString方法。`xs mkString (pre, sep, post)`涉及四个操作
+元：要显示的列表xs、出现在最前面的前缀字符串pre、在元素间分隔字符串sep，以及出现在最后面的后缀字符串post。这个操作的结果是如下的字符串：    
+``` 
+    pre + xs(0) + sep + ... + sep + xs(xs.length -1) + post
+```    
+　　mkString有两个重载的变种，让我们不必填写部分或全部入参。第一个变种是只接收一个分隔字符串：`xs mkString sep`，等效于`xs mkString 
+("", sep, "")`;第二个变种可以什么入参都不填：`xs mkString`等效于`xs mkString ""`。    
+　　mkString方法还有别的变种，比如addString，这个方法将构建出来的字符串追加到一个StringBuilder对象（scala.StringBuilder），而不是作
+为结果返回：    
+```scala
+val buf = new StringBuilder
+"abcde" addString (buf, "(", ";", ")")
+
+```    
+　　mkString和addString这两个方法继承自List的超特质Traversable，因此它们也可以用在所有其他集合类型上。    
+
+### 转换列表：iterator、toArray、copyToArray    
+　　为了在扁平的数组世界和递归的列表世界之间做数据转换，可以使用List类的toArray和Array类的toList方法。    
+　　还有一个copyToArray方法可以将列表中的元素依次复制到目标数组的指定位置。如下操作：    
+```
+xs copyToArray (arr, start) 
+```    
+　　列表xs的所有元素复制至数组arr，从下表start开始（要确保目标数组足够容纳整个列表）。    
+

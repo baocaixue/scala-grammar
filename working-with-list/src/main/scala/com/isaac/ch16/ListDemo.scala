@@ -55,5 +55,22 @@ object ListDemo {
 
     val list = List(1, 2, 3, 4, 5)
     println(rev(list))
+    println(list drop 2)
+    println(list take 2)
+    println(list splitAt 2)
+    println(list indices)
+
+    val fruits = List("apple", "orange", "pears")
+    val flatten = fruits.flatMap(_.toCharArray)//map(_.toCharArray).flatten
+    println(flatten)
+
+    println(list zip fruits)
+
+    val string = fruits mkString ("fruit: ", "\t", " end")
+    println(string)
+
+    val buf = new StringBuilder
+    val result = fruits addString(buf, "(", ";", ")")
+    println(result)
   }
 }
