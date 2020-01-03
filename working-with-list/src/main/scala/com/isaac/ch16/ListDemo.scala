@@ -72,5 +72,9 @@ object ListDemo {
     val buf = new StringBuilder
     val result = fruits addString(buf, "(", ";", ")")
     println(result)
+
+    val li = List(1, 4, 3, 2, 7, 5, 6, 8, 9, 0)
+    val sorted = msort((x: Int, y: Int) => x < y)(li)
+    println(sorted)
   }
 }
