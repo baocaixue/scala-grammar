@@ -18,4 +18,7 @@ package object ch16 {
       merge(msort(less)(ys), msort(less)(zs))
     }
   }
+
+  def reverseLeft[T](xs: List[T]) =
+    (List[T]() /: xs){(ys, y) => y :: ys}
 }

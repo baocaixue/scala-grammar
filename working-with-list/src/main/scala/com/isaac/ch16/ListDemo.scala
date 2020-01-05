@@ -6,6 +6,7 @@ object ListDemo {
     basicOperationOnList()
     listPattern()
     firstOrderMethods()
+    highOrderMethods()
   }
 
   def constructList() = {
@@ -76,5 +77,17 @@ object ListDemo {
     val li = List(1, 4, 3, 2, 7, 5, 6, 8, 9, 0)
     val sorted = msort((x: Int, y: Int) => x < y)(li)
     println(sorted)
+  }
+
+  def highOrderMethods()= {
+    //1 <= j < i <5 (i,j)
+    val tuple = List.range(1, 5).flatMap(i => List.range(1, i).map(j => (j, i)))
+    println(tuple)
+
+    val nums = List(1, 2, -1, 3, 4, 5, 0)
+    val positives = nums takeWhile (_ > 0)
+    println(positives)
+    println(nums span (_ > 0))
+    println(reverseLeft(nums))
   }
 }
