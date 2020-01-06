@@ -424,3 +424,18 @@ val multiplication = List.tabulate(5,5)(_ * _)//List(List(0,0,0,0,0), List(0,1,2
 　　concat方法将多个列表拼接在一起。要拼接的列表通过concat的直接入参给出：`List.concat(List('a','b'), List('c'))`。    
 
 ***    
+## Processing-Multiple-Lists    
+　　元组的zipped方法将若干通用的操作一般化了，它们不再只是针对单个列表而是能同时处理多个列表。其中一个通用的操作是map。对两个zip在一起的列
+表调用map的效果是对元素一组一组地做映射，而不是单个元素。每个列表的第一个元素是一对，第二个也是，以此类推，列表有多长，就有多少对。参考下面
+的例子：    
+```scala
+(List(10,20), List(3,4,5)).zipped.map(_ * _)//List(30,80)
+```    
+　　注意第二个列表的第三个元素被丢弃了。zipped方法只会把所有列表中都有值的元素zip在一起，多出来的元素会被丢弃。    
+　　同理，exists和forall也有zip起来的版本。它们跟单列表的版本做的事情相同，只不过它们操作的是多个列表而不是一个：    
+```scala
+(List("abc","de"), List(3,2)).zipped.forall(_.length == _)//true
+(List("abc","de"), List(3,2)).zipped.exists(_.length != _)//false
+```    
+
+***    

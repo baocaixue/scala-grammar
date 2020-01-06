@@ -7,6 +7,7 @@ object ListDemo {
     listPattern()
     firstOrderMethods()
     highOrderMethods()
+    multipleList()
   }
 
   def constructList() = {
@@ -89,5 +90,12 @@ object ListDemo {
     println(positives)
     println(nums span (_ > 0))
     println(reverseLeft(nums))
+  }
+
+  def multipleList(): Unit = {
+    val list1 = List(1, 2, 3)
+    val list2 = List(10, 20)
+    println((list1, list2).zipped.map(_ * _))
+    println((list1 zip list2).map(item => item._1 * item._2))
   }
 }
