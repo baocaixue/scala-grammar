@@ -390,3 +390,37 @@ List(1, -3, 4, 2, 6) sortWith (_ < _)
 　　注意，sortWith执行的跟前面的msort算法类似的归并排序。不过sortWith是List类的方法，而msort定义在列表之外。    
 
 ***
+## Methods-Of-The-List-Object    
+　　除了List类上的方法（具体列表对象调用），还有一些方法是定义在全局可访问对象scala.List上的，这是List类的伴生对象。某些操作是用于创建列
+表的工厂方法，另一些是对特定形状的列表进行操作。    
+
+### 从元素创建列表：List.apply    
+　　我们已经看到过不止一次诸如`List(1, 2, 3)`这样的列表字面量。这样的语法并没有什么特别之处。List(1,2,3)这样的字面量只不过是简单地将对系
+List应用到元素1、2、3而已。也就是说，它跟`List.apply(1, 2, 3)`是等效的。    
+
+### 创建数值区间：List.range    
+　　List的range方法创建的是一个包含一个区间的数值的列表。这个方法最简单的形式是`List.range(from, until)`，创建一个包含了从from开始递增
+到 until-1的数的列表。所以最终 util并不是区间的一部分。    
+　　range方法还有另一个版本，接收step作为参数。这个操作交出的列表元素是从from开始，间隔为step的值。step可以是正值也可以是负值。    
+
+### 创建相同元素的列表：List.fill    
+　　fill方法创建包含零个或多个同一个元素拷贝的列表。它接收两个参数：要创建的列表长度和需要重复的元素。两个参数各自以不同的参数列表给出：    
+```scala
+val list1 = List.fill(5)('a')
+val list2 = List.fill(3)("hello")
+```    
+　　如果给fill的参数多于1个，那么它就会创建多维的列表。也就是说，它将创建出列表的列表、列表的列表的列表，等等。多出来的参数要放在第一个参数
+列表中：`List.fill(2, 3)('b')//List(List('b','b','b'), List('b','b','b'))`    
+
+### 表格化一个函数：List.tabulate    
+　　tabulate方法创建的是一个根据给定的函数计算的元素的列表。其入参和`List.fill`的一样：第一个参数列表给出要创建列表的维度，而第二个参数列
+表描述列表的元素。唯一的区别是，元素值不再是固定的，而是从函数计算得来的：    
+```scala
+val squares = List.tabulate(5)(n => n * n)//List(0,1,4,9,16)
+val multiplication = List.tabulate(5,5)(_ * _)//List(List(0,0,0,0,0), List(0,1,2,3,4), List(0,2,4,6,8),List(0,3,6,9,12), List(0,4,8,12,16))
+```    
+
+### 拼接多个列表：List.concat    
+　　concat方法将多个列表拼接在一起。要拼接的列表通过concat的直接入参给出：`List.concat(List('a','b'), List('c'))`。    
+
+***    
