@@ -26,6 +26,7 @@
         <module>assertions-and-tests</module>
         <module>case-classes-and-pattern-matching</module>
         <module>working-with-list</module>
+        <module>working-with-other-collections</module>
     </modules>
 
     <properties>
