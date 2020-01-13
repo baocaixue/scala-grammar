@@ -71,3 +71,105 @@ hasUpperCase("isaac bao")//false
 式地将s转换成StringOps，StringOps有这样一个方法。exists方法将字符串当作字符的序列，当序列中存在大写字符时，这个方法返回true。    
 
 ***    
+## Sets-And-Maps    
+　　Scala的集合类库同时提供了可变和不可变两个版本的集和类库。当写下“Set”或“Map”时，默认得到的是一个不可变的对象。如果想要的是可变的版本，
+需要显式地做一次引入。Scala让我们更容易访问到不可变的版本，这是鼓励我们尽量使用不可变的集合。这样的访问便利是通过`Predef`对象完成的，这个
+对象的内容在每个Scala源文件中都会隐式地引入。下面给出了相关定义：    
+```scala
+object Predef {
+  type Map[A, +B] = collection.immutable.Map[A, B]
+  type Set[A] = collection.immutable.Set[A]
+  val Map = collection.immutable.Map
+  val Set = collection.immutable.Set
+  // ...
+}
+```    
+　　`Predef`利用“type”关键字定义了`Set`和`Map`这两个别名，分别对应不可变的集和不可变的映射的完整名称。名为`Set`和`Map`的val被初始化成
+指向不可变的`Set`和`Map`的单例对象。因此`Map`等同于`Predef.Map`，而`Predef.map`又等同于`scala.collection.immutable.Map`。这一点
+对于`Map`类型和`Map`对象都成立。    
+　　如果想在同一个源文件中同时使用可变的和不可变的集或映射，一种方式是引入包含可变版本的包：`import scala.collection.mutable`。可以继续
+用`Set`来表示不可变集，不过现在还可以用`mutable.Set`来表示可变集：`val mutaSet = mutable.Set(1, 2, 3)`。    
+
+### 使用集    
+　　集的关键特征是它们会确保同一时刻，以==为标准，集里的每个对象都最多出现一次。作为示例，将用一个集来统计某个字符串中不同单词的个数。如果将
+空格和标点符号作为分隔符给出，String的split方法可以帮助我们将字符串且分成单词。“\[ ! , .\]”这样的正则表达式表示给定的字符串需要在有一个
+或多个空格或标点符号的地方切开。    
+```scala
+val text = "See Spot run. Run, Spot. Run!"
+val wordsArray = text.split("[ ! , .]+")
+val words = scala.collection.mutable.Set.empty[String]
+for (word <- wordsArray) words += word.toLowerCase
+words//Set(see, run, spot)
+```    
+　　可变集和不可变集常用的方法如下：    
+
+| 操作 | 这个操作做什么 
+| --- | ---    
+| val nums = Set(1, 2, 3) | 创建一个不可变集
+| nums + 5 | 添加一个元素
+| nums - 3 | 移除一个元素
+| nums ++ List(5, 6) | 添加多个元素
+| nums -- List(1, 2) | 移除多个元素
+| nums & Set(1, 3, 5, 7) | 获取两个集的交集
+| nums.size | 返回集的大小
+| nums.contains(3) | 检查是否包含
+| ～～～～～～～～ | ~~~~~~~~~~~~
+| import scala.collection.mutable | 让可变集合易于访问
+| val words = mutable.Set.empty\[String\] | 创建一个空的可变集
+| words += "the" | 添加一个元素
+| words -= "the" | 移除一个元素
+| words ++= List("do", "re", "mi") | 添加多个元素
+| words --= List("do", "re") | 移除多个元素
+| words.clear | 移除所有元素    
+
+### 使用映射    
+　　映射让我们可以对某个集的每个元素都关联一个值。使用映射看上去跟使用数组很像，只不过我们不再是用从0开始的整数下标去索引，而是可以用任何键来
+索引它。如果引入了mutable这个包名，就可以像这样创建一个空的可变映射：`val map = mutable.Map.empty[String, Int]`。    
+　　注意在创建映射时，必须给出两个类型。第一个类型针对映射的*键（key）*，而第二个类型是针对映射的*值（value）*。在本例中，键是字符串，而值
+是整数。在映射中设置条目看上去跟在数组中设置条目类似：    
+```scala
+import scala.collection.mutable.Map
+val map = Map.empty[String, Int]
+map("hello") = 1
+map("there") = 2
+//读取
+map("hello")//1
+```    
+　　下面是一个统计每个单词在字符串中出现次数的方法：    
+```scala
+import scala.collection.mutable
+def countWords(text: String) = {
+  val counts = mutable.Map.empty[String, Int]
+  for (rawWord <- text.split("[ ! . ,]+")) {
+    val word = rawWord.toLowerCase
+    val oldCount = if (counts.contains(word)) counts(word) else 0
+    counts += (word -> (oldCount + 1))
+  }
+  counts
+}
+```    
+　　可变映射和不可变映射最常用的方法如下：    
+
+| 操作 | 这个操作做什么
+| --- | ---
+| val nums = Map("i" -> 1, "ii" -> 2) | 创建一个不可变映射
+| nums + ("vi" -> 6) | 添加一个条目
+| nums - "ii" | 移除一个条目
+| nums ++ List("iii" -> 3, "v" -> 5) | 添加多个条目
+| nums -- List("i", "ii") | 移除多个条目
+| nums.size | 返回映射大小
+| nums.contains("ii") | 检查是否包含
+| nums("ii") | 获取指定键的值
+| nums.keys | 返回所有的键
+| nums.keySet | 以集的形式返回所有的键
+| nums.values | 返回所有的值
+| nums.isEmpty | 表示映射是否为空
+| ~~~~~~~~~~~~~~~ | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+| import scala.collection.mutable | 让可变集合易于访问
+| val words = mutable.Map.empty\[String, Int\] | 创建一个空的可变映射
+| words += ("one" -> 1) | 添加一个从"one"到1的映射条目
+| words -= "one" | 移除一个映射条目
+| words ++= List("one" -> 1, "two" -> 2, "three" -> 3) | 添加多个条目
+| words --= List("one", "two") | 移除多个条目    
+
+### 默认的集和映射    
