@@ -173,3 +173,55 @@ def countWords(text: String) = {
 | words --= List("one", "two") | 移除多个条目    
 
 ### 默认的集和映射    
+　　对于大部分使用场景，由`Set()`、`scala.collection.mutable.Map()`等工厂方法提供的可变和不可变的集和映射的实现通常都够用了。这些工厂
+方法提供的实现使用快速的查找算法，通常用到哈希表，因此可以很快判断出某个对象是否在集合中。    
+　　举例来说，`scala.collection.mutable.Set()`这个工厂方法返回一个`scala.collection.mutable.HashSet`，在内部使用了哈希表。同理，
+`scala.collection.mutable.Map()`这个工厂方法返回的是一个`scala.collection.mutable.HashMap`。    
+　　对于不可变集和映射而言，情况要稍微复杂一些。举例来说，`scala.collection.immutable.Set()`工厂方法返回的类取决于传入了多少元素（详细
+明细参见下表）。对于少于五个元素的集，有专门的特定大小的类与之对应，以此来达到最好的性能。一旦要求一个大于等于五个元素的集，这个工厂方法将返
+回一个使用哈希字典树（hash trie）的实现。    
+
+| 元素个数 | 实现    
+| --- | ---
+| 0 | scala.collection.immutable.EmptySet
+| 1 | scala.collection.immutable.Set1
+| 2 | scala.collection.immutable.Set2
+| 3 | scala.collection.immutable.Set3
+| 4 | scala.collection.immutable.Set4
+| 5或更多 | scala.collection.immutable.HashSet     
+　　同理，`scala.collection.immutable.Map()`这个工厂方法会根据我们传给它多少键值来据定返回什么类的实现（详细参见下表）。跟集类似，对于
+少于五个元素的不可变映射，都会有一个特定的固定大小的映射与之对应，以此来达到最佳性能。而一旦映射中的键值对个数达到或超过五个，则会使用不可变
+的HashMap。    
+
+| 元素个数 | 实现     
+| --- | ---
+| 0 | scala.collection.immutable.EmptyMap
+| 1 | scala.collection.immutable.Map1
+| 2 | scala.collection.immutable.Map2
+| 3 | scala.collection.immutable.Map3
+| 4 | scala.collection.immutable.Map4
+| 5 | scala.collection.immutable.HashMap    
+　　上面两个表给出的默认不可变实现类能够带给我们最佳的性能。举例来说，如果添加一个元素到EmptySet，我们将得到一个Set1。如果添加一个元素到
+Set1,将得到一个Set2。如果从Set2移除一个元素，又会得到一个Set1。    
+
+### 排好序的集和映射    
+　　有时我们可能需要一个迭代器按照特定顺序返回元素的集或映射。对此，Scala集合类提供了*SortedSet*和*SortedMap*特质。这些特质被**TreeSet**
+和**TreeMap**类实现，这些实现用红黑树来保持元素（对TreeSet而言）或键（对TreeMap而言）的顺序。具体顺序由*Ordered*特质决定，集的元素类型
+或映射的键的类型都必须混入或能够被隐式转换成Ordered。这两个类只有不可变的版本。    
+　　TreeSet的例子：    
+```scala
+import scala.collection.immutable.TreeSet
+
+val ts = TreeSet(9, 3, 1, 8, 0, 2, 7, 4, 6, 5)//0 1 2 3 4 5 6 7 8 9
+val cs = TreeSet('f', 'u', 'n')//f n u
+```    
+　　TreeMap的例子：    
+```scala
+import scala.collection.immutable.TreeMap
+
+var tm = TreeMap(3 -> 'x', 1 -> 'x', 4 -> 'x')//1->x 3->x 4->x
+tm += (2 -> 'x')
+tm //1->x 2->x 3->x 4->x
+```    
+
+## 
