@@ -255,3 +255,57 @@ people -= "Jane"
 people ++= List("Tom", "Isaac")
 ```    
 
+## Initializing-Collections    
+　　创建和初始化一个集合最常见的方式是将初始元素传入所选集合的伴生对象的工厂方法。只需要将元素放在伴生对象名后的圆括号里，Scala编译器会将它
+转换成伴生对象apply方法的调用：    
+```scala
+List(1, 2, 3)
+Set('a', 'b', 'c')
+
+import scala.collection.mutable
+mutable.Map("hi" -> 2, "there" -> 5)
+
+Array(1.0, 2.0, 3.0)
+```    
+　　虽然大部分时候可以让Scala编译器从传入工厂方法的元素来推断出集合类型，但是有的时候我们可能希望在创建集合时指定跟编译器所选的不同的类型。
+对于可变集合来说尤其 如此。参考下面的例子：    
+```scala
+import scala.collection.mutable
+val stuff = mutable.Set(42)
+stuff += "a"//error: type mismatch; found: String required: Int
+```    
+　　这里的问题是stuff被编译器推断为类型Int的集合。如果想要的类型是Any，得显式地将元素类型放在方括号里：`val stuff = mutable.Set[Any](42)`。
+另一个特殊的情况是当我们用别的集合初始化当前集合的时候。举例来说，假设有一个列表，但希望用TreeSet来包含这个列表的元素。    
+```scala
+import scala.collection.immutable.TreeSet
+val colors = List("blue", "yellow", "red", "green")
+//val treeSet = TreeSet(colors)//不能将colors列表传入TreeSet工厂方法
+
+//需要创建一个空的TreeSet[String],然后用TreeSet的++操作将列表元素添加进去
+val treeSet = TreeSet[String]() ++ colors
+```    
+
+### 转换成数组或列表    
+　　如果想用别的集合初始化数组或列表则相对直截了当。要用别的集合初始化新的列表，只需要简单地对集合调用toList：`treeSet.toList`。如果要初
+始化数组，就调用toArray：`treeSet.toArray`。    
+　　注意虽然原始的colors列表没有排序，对TreeSet调用toList得到的列表中，元素是按字母顺序排序的。当对集合调用toList或toArray时，产生的列
+表或数组中元素的顺序跟调用elements获取迭代器产生的元素顺序一致。由于`TreeSet[String]`的迭代器会按照字母顺序产生字符串，这些字符串在对这个
+TreeSet调用toList得到的i列表中也会按字母顺序出现。    
+　　需要注意的是，转换成列表或数组通常需要将集合的所有元素做拷贝，因此对于大型集合来说可能会比较费时。不过由于某些已经存在的API，我们有时需
+要这样做。而且，许多集合本来元素就不多，因拷贝带来的性能开销并不高。    
+
+### 在可变和不可变集及映射间转换    
+　　还有可能出现的一种情况是将可变集或映射转换成不可变的版本，或者反过来。要完成这样的转换，可以用前面展示的用列表元素初始化TreeSet的技巧。
+首先用empty创建一个新类型的集合，然后用++或++=添加新元素。    
+```scala
+import  scala.collection.mutable
+val treeSet = scala.collection.immutable.TreeSet("blue", "green", "red", "yellow")
+val mutaSet = mutable.Set.empty ++= treeSet
+val immutaSet = Set.empty ++ mutaSet
+
+//映射
+val muta = mutable.Map("i" -> 1, "ii" -> 2)
+val immu = Map.empty ++ muta
+```    
+
+## 
