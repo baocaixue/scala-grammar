@@ -7,6 +7,7 @@ object Sample {
     useMutable()
     println(distinctWordsSize("See Spot run. Run, Spot. Run!"))
     println(countWords("See Spot run. Run, Spot. Run!"))
+    println(longestWord(Array("1", "11", "00000", "111")))
   }
 
   def useMutable() = {
@@ -33,5 +34,12 @@ object Sample {
       if (container.contains(word)) container(word) = container(word) + 1 else container(word) = 1
     })
     container
+  }
+
+  //return longest word and it's length
+  def longestWord(words: Array[String]) = {
+    val lengths = words.map(_.length)
+    val resultList = words zip lengths
+    resultList.maxBy(_._2)
   }
 }
