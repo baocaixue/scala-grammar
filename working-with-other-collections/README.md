@@ -188,7 +188,8 @@ def countWords(text: String) = {
 | 2 | scala.collection.immutable.Set2
 | 3 | scala.collection.immutable.Set3
 | 4 | scala.collection.immutable.Set4
-| 5或更多 | scala.collection.immutable.HashSet     
+| 5或更多 | scala.collection.immutable.HashSet        
+
 　　同理，`scala.collection.immutable.Map()`这个工厂方法会根据我们传给它多少键值来据定返回什么类的实现（详细参见下表）。跟集类似，对于
 少于五个元素的不可变映射，都会有一个特定的固定大小的映射与之对应，以此来达到最佳性能。而一旦映射中的键值对个数达到或超过五个，则会使用不可变
 的HashMap。    
@@ -200,7 +201,8 @@ def countWords(text: String) = {
 | 2 | scala.collection.immutable.Map2
 | 3 | scala.collection.immutable.Map3
 | 4 | scala.collection.immutable.Map4
-| 5 | scala.collection.immutable.HashMap    
+| 5 | scala.collection.immutable.HashMap        
+
 　　上面两个表给出的默认不可变实现类能够带给我们最佳的性能。举例来说，如果添加一个元素到EmptySet，我们将得到一个Set1。如果添加一个元素到
 Set1,将得到一个Set2。如果从Set2移除一个元素，又会得到一个Set1。    
 
